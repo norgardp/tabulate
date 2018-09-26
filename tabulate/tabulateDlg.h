@@ -37,12 +37,17 @@ public:
 	CButton InsertFile;
 	CButton RemoveFile;
 	CButton SelectDataDir;
+	CButton OutputOption;
 	CEdit PSEnergyTolerance;
 	CStatic OutputDescription;
-//	CListCtrl ControlDirListing;
 	CListCtrl LibraryContent;
 	CListCtrl LibDirContent;
 	CListCtrl DataDirContent;
+
 	afx_msg void OnLvnColumnclickListNlbFilelisting(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnHdnItemclickListNlbFilelisting(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedRadioOptA();
+	afx_msg void OnBnClickedRadioOptb();
+	afx_msg void OnBnClickedRadioOptc();
+	afx_msg void OnBnClickedRadioOptd();
 };

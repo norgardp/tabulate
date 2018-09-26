@@ -6,6 +6,7 @@
 #include "tabulate.h"
 #include "tabulateDlg.h"
 #include "afxdialogex.h"
+#include "ProgramDefaults.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,6 +68,7 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_NLB_FILELISTING, LibraryContent);
 	DDX_Control(pDX, IDC_LIST_NLB_DIRLISTING, LibDirContent);
 	DDX_Control(pDX, IDC_LIST_CNF_ANALYSISFILES, DataDirContent);
+	DDX_Control(pDX, IDC_RADIO_OPTA, OutputOption);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -75,6 +77,10 @@ BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST_NLB_FILELISTING, &CtabulateDlg::OnLvnColumnclickListNlbFilelisting)
 	ON_NOTIFY(HDN_ITEMCLICK, 0, &CtabulateDlg::OnHdnItemclickListNlbFilelisting)
+	ON_BN_CLICKED(IDC_RADIO_OPTA, &CtabulateDlg::OnBnClickedRadioOptA)
+	ON_BN_CLICKED(IDC_RADIO_OPTB, &CtabulateDlg::OnBnClickedRadioOptb)
+	ON_BN_CLICKED(IDC_RADIO_OPTC, &CtabulateDlg::OnBnClickedRadioOptc)
+	ON_BN_CLICKED(IDC_RADIO_OPTD, &CtabulateDlg::OnBnClickedRadioOptd)
 END_MESSAGE_MAP()
 
 
@@ -110,6 +116,7 @@ BOOL CtabulateDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -172,10 +179,38 @@ void CtabulateDlg::OnLvnColumnclickListNlbFilelisting(NMHDR *pNMHDR, LRESULT *pR
 	*pResult = 0;
 }
 
-// Select an item :
+// Select a single item from the library file listing
 void CtabulateDlg::OnHdnItemclickListNlbFilelisting(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
 	// TODO: Add your control notification handler code here
 	*pResult = 0;
+}
+
+
+void CtabulateDlg::OnBnClickedRadioOptA()
+{
+	OutputDescription.SetWindowTextW(output_option_a);
+	UpdateData(FALSE);
+}
+
+
+void CtabulateDlg::OnBnClickedRadioOptb()
+{
+	OutputDescription.SetWindowTextW(output_option_b);
+	UpdateData(FALSE);
+}
+
+
+void CtabulateDlg::OnBnClickedRadioOptc()
+{
+	OutputDescription.SetWindowTextW(output_option_c);
+	UpdateData(FALSE);
+}
+
+
+void CtabulateDlg::OnBnClickedRadioOptd()
+{
+	OutputDescription.SetWindowTextW(output_option_d);
+	UpdateData(FALSE);
 }
