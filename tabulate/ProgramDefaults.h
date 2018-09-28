@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #define GENIE_MAX_PATH 250
-#define GENIE_MAX_DELETE 10
+#define GENIE_MAX_DELETE 20
 
 // Peak search energy tolerance acceptable limits
 #define GENIE_MAX_ETOL 5.0
@@ -29,4 +29,4 @@ static constexpr TCHAR* output_option_c = _T("Sample ID and Percent Dead Time; f
 static constexpr TCHAR* output_option_d = _T("Real Time and Corrected Live Time; for each energy line\n - Peak Area\n - Peak FWHM (keV)\n - Error (%)");
 
 // Energy tolerance used for library directed peak search
-static constexpr float default_energy_tolerance = 2.50;
+static constexpr double default_energy_tolerance = 2.50;

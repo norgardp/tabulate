@@ -215,15 +215,18 @@ void CtabulateDlg::OnBnClickedRadioOptd()
 }
 
 
-void CtabulateDlg::SetEnergyTolerance(const float f)
+void CtabulateDlg::SetEnergyTolerance(const double f)
 {
 	CString str;
-	str.Format(_T("%1.3f"), f);
+	str.Format(_T("%1.2f"), f);
 	PSEnergyTolerance.SetWindowTextW(str);
 }
 
 
-void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter)
+void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory, 
+	const LPCTSTR filter)
+// Populate a listbox with the contents of a directory; the results are to be
+// filtered based on the file extension.
 {
 	const TCHAR* localdir = directory;
 	const TCHAR* localfilt = filter;
@@ -235,6 +238,8 @@ void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory, con
 
 
 void CtabulateDlg::OnBnClickedBtnSelectDir()
+// Select a non-default DataDirectory. If the new selection is canceled make the
+// previous directory the default.
 {
 	TCHAR previousDirectory[GENIE_MAX_PATH];
 	::GetCurrentDirectory(GENIE_MAX_PATH, previousDirectory);
@@ -258,14 +263,13 @@ void CtabulateDlg::OnBnClickedBtnSelectDir()
 
 void CtabulateDlg::VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, 
 	const CListBox* ptrListBox)
+// Read contents of a listbox object into a std::vector object. 
 {
 	CString localstring;
 	CListBox* localListbox = (CListBox*)ptrListBox;
-	
-	// Learn about the listbox and prepare the new cstring vector
+
 	const int count{ GetListBoxCount(localListbox) };
 	PrepareVectorForList(ptrDirectoryListing, count);
-
 	for (int i{ 0 }; i < count; i++)
 	{
 		ptrListBox->GetText(i, localstring);
@@ -280,17 +284,17 @@ int CtabulateDlg::GetListBoxCount(CListBox* listbox)
 }
 
 
-void CtabulateDlg::PrepareVectorForList(std::vector<CString>* listvector, int newcount)
+void CtabulateDlg::PrepareVectorForList(std::vector<CString>* listvector, 
+	int newcount)
 {
-	// clear out old data
 	listvector->erase(listvector->begin(), listvector->end());
-
-	// reserve new space
 	listvector->reserve(newcount);
 }
 
 
 void CtabulateDlg::OnBnClickedBtnFileinsert()
+// Insert items into the DataFile listbox. Duplicate entries will be filtered out
+// and multiple selections are permitted during any individual attempt.
 {
 	CString path;
 
@@ -314,6 +318,9 @@ void CtabulateDlg::OnBnClickedBtnFileinsert()
 
 
 void CtabulateDlg::OnBnClickedBtnFileremove()
+// Remove items from the DataFile listbox. Multiple selections are permitted.
+// A hard limit on the number of removed items PER ACTION is set by the defined
+// GENIE_MAX_DELETE in the program defaults.
 {
 	// Get current selection and remvoe items from Vecotr AND CListBox
 	int items[GENIE_MAX_DELETE];
@@ -329,7 +336,11 @@ void CtabulateDlg::OnBnClickedBtnFileremove()
 }
 
 
-void CtabulateDlg::PopulateListBoxItems(CListBox* listbox, std::vector<CString>* data)
+void CtabulateDlg::PopulateListBoxItems(CListBox* listbox, 
+	std::vector<CString>* data)
+// Push the contents of a std::vector<CString> into the listbox. This is used
+// when adding or removing items from the listbox; its easier to manipulate the
+// data in a std::vector than a listbox.
 {
 	listbox->ResetContent();
 	for (size_t i{ 0 }; i < data->size(); i++)
@@ -337,7 +348,11 @@ void CtabulateDlg::PopulateListBoxItems(CListBox* listbox, std::vector<CString>*
 }
 
 
-bool CtabulateDlg::LocateVectorDuplicateEntry(const std::vector<CString>* data, const CString testvalue)
+bool CtabulateDlg::LocateVectorDuplicateEntry(const std::vector<CString>* data, 
+	const CString testvalue)
+// Determine of testvalue input occurs within the std::vector data. If it does, 
+// return false, otherwise true. Used to test whether to include testvalue in
+// the data vector.
 {
 	bool unique{ true };
 	for (size_t i{ 0 }; i < data->size(); i++)
@@ -350,16 +365,14 @@ bool CtabulateDlg::LocateVectorDuplicateEntry(const std::vector<CString>* data, 
 
 
 void CtabulateDlg::OnEnKillfocusEditEnergytol()
+// Verify user supplied energy tolerance is within "reasonable" limits as set
+// forth in the program defaults. If not, revert to default energy tolerance.
 {
 	CString windowtext;
 	PSEnergyTolerance.GetWindowTextW(windowtext);
-	float tempfloat = _ttof(windowtext);
+	double tempfloat = _ttof(windowtext);
 	if ((tempfloat > GENIE_MIN_ETOL) && (tempfloat < GENIE_MAX_ETOL))
 		EnergyTolerance = tempfloat;
 	else
-	{
-		EnergyTolerance = default_energy_tolerance;
-		windowtext.Format(_T("%1.3f"), EnergyTolerance);
-		PSEnergyTolerance.SetWindowTextW(windowtext);
-	}
+		SetEnergyTolerance(default_energy_tolerance);
 }

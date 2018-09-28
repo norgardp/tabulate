@@ -6,6 +6,7 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 #include "ProgramDefaults.h"
+#include "AuxillaryFunctions.h"
 #include <vector>
 
 // CtabulateDlg dialog
@@ -51,7 +52,7 @@ public:
 	afx_msg void OnBnClickedRadioOptd();
 
 private:
-	void SetEnergyTolerance(const float f);
+	void SetEnergyTolerance(const double f);
 	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
 
 	CString DataDirectory;
@@ -59,7 +60,7 @@ private:
 	int LibFileCount;
 	std::vector<CString> DatFiles;
 	int DatFileCount;
-	float EnergyTolerance;
+	double EnergyTolerance;
 	
 public:
 	afx_msg void OnBnClickedBtnSelectDir();
