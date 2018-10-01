@@ -64,12 +64,13 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BTN_SELECTDIR, SelectDataDir);
 	DDX_Control(pDX, IDC_EDIT_ENERGYTOL, PSEnergyTolerance);
 	DDX_Control(pDX, IDC_OUTPUTDESC, OutputDescription);
-	DDX_Control(pDX, IDC_LIST_NLB_FILELISTING, LibraryContent);
+	//DDX_Control(pDX, IDC_LIST_NLB_FILELISTING, LibraryContent);
 	DDX_Control(pDX, IDC_RADIO_OPTA, OutputOption);
 	DDX_Control(pDX, IDC_LIST_CNFFILESFORANALYSIS, DataFileListing);
 	DDX_Control(pDX, IDC_LIST_LIBFILESINDIR, LibraryFileListing);
 	DDX_Control(pDX, IDC_STC_DATDIR, labelDataDir);
 	DDX_Control(pDX, IDC_STC_LIBDIR, labelLibDir);
+	DDX_Control(pDX, IDC_LIST_LIBCONTENT, LibraryContentListing);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -84,6 +85,8 @@ BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_FILEINSERT, &CtabulateDlg::OnBnClickedBtnFileinsert)
 	ON_BN_CLICKED(IDC_BTN_FILEREMOVE, &CtabulateDlg::OnBnClickedBtnFileremove)
 	ON_EN_KILLFOCUS(IDC_EDIT_ENERGYTOL, &CtabulateDlg::OnEnKillfocusEditEnergytol)
+	//ON_LBN_SELCHANGE(IDC_LIST_LIBFILESINDIR, &CtabulateDlg::OnLbnSelchangeListLibFilesInDir)
+	ON_BN_CLICKED(IDC_BUTTON1, &CtabulateDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -375,4 +378,26 @@ void CtabulateDlg::OnEnKillfocusEditEnergytol()
 		EnergyTolerance = tempfloat;
 	else
 		SetEnergyTolerance(default_energy_tolerance);
+}
+
+
+CString CtabulateDlg::GetListBoxSelection(const int i)
+{
+	CString selected_text;
+	LibraryFileListing.GetText(i, selected_text);
+	return selected_text;
+}
+
+
+void CtabulateDlg::OnBnClickedButton1()
+{
+	LIBreader cam_lib;
+	CString libfile{ default_genie_library_directory };
+	int sel = LibraryFileListing.GetCurSel();
+	if (sel != LB_ERR)
+		libfile += GetListBoxSelection(sel);
+
+	cam_lib.CreateLIBObject(libfile);
+	libfile = cam_lib.ReturnListing();
+	LibraryContentListing.AddString(libfile);
 }

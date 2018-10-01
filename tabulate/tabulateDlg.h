@@ -42,14 +42,20 @@ public:
 	CButton OutputOption;
 	CEdit PSEnergyTolerance;
 	CStatic OutputDescription;
-	CListCtrl LibraryContent;
+	//CListCtrl LibraryContent;
 	CListBox DataFileListing;
 	CListBox LibraryFileListing;
+	CStatic labelDataDir;
+	CStatic labelLibDir;
 
 	afx_msg void OnBnClickedRadioOptA();
 	afx_msg void OnBnClickedRadioOptb();
 	afx_msg void OnBnClickedRadioOptc();
 	afx_msg void OnBnClickedRadioOptd();
+	afx_msg void OnBnClickedBtnFileinsert();
+	afx_msg void OnBnClickedBtnFileremove();
+	afx_msg void OnEnKillfocusEditEnergytol();
+	afx_msg void OnBnClickedBtnSelectDir();
 
 private:
 	void SetEnergyTolerance(const double f);
@@ -61,21 +67,18 @@ private:
 	std::vector<CString> DatFiles;
 	int DatFileCount;
 	double EnergyTolerance;
-	
-public:
-	afx_msg void OnBnClickedBtnSelectDir();
-	CStatic labelDataDir;
-	CStatic labelLibDir;
+	//LIBreader cam_library;
+
 private:
 	void VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, const CListBox* ptrListBox);
 	int GetListBoxCount(CListBox* listbox);
 	void PrepareVectorForList(std::vector<CString>* listvector, int newcount);
-public:
-	afx_msg void OnBnClickedBtnFileinsert();
-	afx_msg void OnBnClickedBtnFileremove();
-private:
 	void PopulateListBoxItems(CListBox* listbox, std::vector<CString>* data);
 	bool LocateVectorDuplicateEntry(const std::vector<CString>* localvector, const CString testvalue);
+	CString GetListBoxSelection(const int i);
+
 public:
-	afx_msg void OnEnKillfocusEditEnergytol();
+	//afx_msg void OnLbnSelchangeListLibFilesInDir();
+	afx_msg void OnBnClickedButton1();
+	CListBox LibraryContentListing;
 };
