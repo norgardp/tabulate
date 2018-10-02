@@ -36,7 +36,22 @@
     <ClInclude Include="ProgramDefaults.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AuxillaryFunctions.h">
+    <ClInclude Include="CAMbase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CNFobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LibraryStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OutputOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NLBobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +65,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AuxillaryFunctions.cpp">
+    <ClCompile Include="CAMbase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CNFobject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NLBobject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

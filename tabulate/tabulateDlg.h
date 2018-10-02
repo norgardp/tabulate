@@ -6,7 +6,8 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 #include "ProgramDefaults.h"
-#include "AuxillaryFunctions.h"
+#include "CNFobject.h"
+//#include "AuxillaryFunctions.h"
 #include <vector>
 
 // CtabulateDlg dialog
@@ -67,7 +68,7 @@ private:
 	std::vector<CString> DatFiles;
 	int DatFileCount;
 	double EnergyTolerance;
-	//LIBreader cam_library;
+	CNFobject dataset;
 
 private:
 	void VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, const CListBox* ptrListBox);
@@ -81,4 +82,5 @@ public:
 	//afx_msg void OnLbnSelchangeListLibFilesInDir();
 	afx_msg void OnBnClickedButton1();
 	CListBox LibraryContentListing;
+
 };

@@ -391,13 +391,13 @@ CString CtabulateDlg::GetListBoxSelection(const int i)
 
 void CtabulateDlg::OnBnClickedButton1()
 {
-	LIBreader cam_lib;
 	CString libfile{ default_genie_library_directory };
 	int sel = LibraryFileListing.GetCurSel();
 	if (sel != LB_ERR)
 		libfile += GetListBoxSelection(sel);
+	std::string test{ CW2A(libfile) };
+	dataset.InitiateLibrarySearch(test);
 
-	cam_lib.CreateLIBObject(libfile);
-	libfile = cam_lib.ReturnListing();
-	LibraryContentListing.AddString(libfile);
+//	libfile = cam_lib.ReturnListing();
+//	LibraryContentListing.AddString(libfile);
 }

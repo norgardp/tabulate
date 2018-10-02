@@ -9,12 +9,14 @@
 // Includes
 #include "ProgramDefaults.h"
 #include "Crackers.h"
+#include "CAMbase.h"
 
 enum class ftype
 {
 	data = 3100,
 	library
 };
+
 
 
 class LIBreader

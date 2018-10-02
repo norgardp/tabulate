@@ -192,7 +192,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AuxillaryFunctions.h" />
+    <ClInclude Include="CAMbase.h" />
+    <ClInclude Include="CNFobject.h" />
+    <ClInclude Include="DataStruct.h" />
+    <ClInclude Include="LibraryStruct.h" />
+    <ClInclude Include="NLBobject.h" />
+    <ClInclude Include="OutputOptions.h" />
     <ClInclude Include="ProgramDefaults.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -201,7 +206,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AuxillaryFunctions.cpp" />
+    <ClCompile Include="CAMbase.cpp" />
+    <ClCompile Include="CNFobject.cpp" />
+    <ClCompile Include="NLBobject.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
