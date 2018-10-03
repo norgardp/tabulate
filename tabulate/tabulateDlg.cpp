@@ -396,8 +396,16 @@ void CtabulateDlg::OnBnClickedButton1()
 	if (sel != LB_ERR)
 		libfile += GetListBoxSelection(sel);
 	std::string test{ CW2A(libfile) };
-	dataset.InitiateLibrarySearch(test);
+	
+	LibraryContentListing.ResetContent();
 
-//	libfile = cam_lib.ReturnListing();
-//	LibraryContentListing.AddString(libfile);
+	NLBobject nlb(test);
+	
+	size_t nuclide_count{ nlb.ReturnNuclideCount() };
+	for (size_t i{ 0 }; i < nuclide_count; i++)
+	{
+		test = nlb.ReturnFormattedLine(i);
+		libfile = test.c_str();
+		LibraryContentListing.AddString(libfile);
+	}
 }

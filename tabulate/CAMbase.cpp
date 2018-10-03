@@ -4,34 +4,38 @@
 
 CAMbase::CAMbase()
 {
-	pDataAccess = CreateDataAccessInterface();
-	DSC = ReturnDataSourceContext();
 }
 
 
 CAMbase::~CAMbase()
 {
-	if (IsOpen()) 
+	if ((pDataAccess != nullptr) && (pDataAccess->IsOpen))
 		pDataAccess->Close(close_mode);
 	
 	if (DSC != nullptr) 
 		DSC = nullptr;
+
+	TRACE("\nCAMbase dtor\n");
 }
 
 
-CanberraDataAccessLib::IDataAccessPtr CAMbase::CreateDataAccessInterface()
+void CAMbase::CreateDataAccessInterface()
 {
-	CanberraDataAccessLib::IDataAccessPtr ptr{ nullptr };
-	HRESULT hr{ ptr.CreateInstance(__uuidof(CanberraDataAccessLib::DataAccess)) };
-	if (FAILED(hr))
-		ptr = nullptr;
-	return ptr;
+	HRESULT hr{ pDataAccess.CreateInstance(__uuidof(CanberraDataAccessLib::DataAccess)) };
+	if (FAILED(hr)) 
+	{
+		pDataAccess = nullptr;
+		TRACE("\nCAM Error: DataAccess interface not created");
+	}
 }
 
 
-HMEM CAMbase::ReturnDataSourceContext()
+void CAMbase::CreateDataSourceContext()
 {
-	return reinterpret_cast<HMEM*>(pDataAccess->AccessHandle);
+	if (pDataAccess->IsOpen)
+		DSC = reinterpret_cast<HMEM*>(pDataAccess->AccessHandle);
+	else
+		TRACE("CAM Error: file is not open");
 }
 
 
@@ -39,17 +43,25 @@ void CAMbase::OpenFile(const std::string name,
 	const CanberraDataAccessLib::OpenMode om,
 	const CanberraDataAccessLib::CloseMode cm)
 {
+	CreateDataAccessInterface();
+
 	SetFilename(name);
 	SetModes(om, cm);
 	pDataAccess->Open(file_name, open_mode, NULL);
+	
+	CreateDataSourceContext();
 }
 
 
 void CAMbase::OpenFile(const std::string name)
 {
+	CreateDataAccessInterface();
+	
 	SetFilename(name);
 	SetModes();
 	pDataAccess->Open(file_name, open_mode, NULL);
+	
+	CreateDataSourceContext();
 }
 
 
@@ -82,13 +94,27 @@ bool CAMbase::IsOpen()
 }
 
 
+LONG CAMbase::ReturnRecordCount(const USHORT class_code)
+{
+	USHORT count;
+	SHORT ret = SadClassCount(DSC, class_code, &count);
+	if (ret != CSI_Okay)
+	{
+		ReportSadError(ret);
+		count = 0;
+	}
+	return count;
+}
+
+
 std::string CAMbase::ReturnStringParam(ULONG param, USHORT record, USHORT buff_len)
 {
-	std::vector<char> buff;
 	std::string retval;
-	buff.reserve(buff_len + 1);	// extra space for null terminator, "just in case"
+	std::vector<char> buff;
+	buff.resize(buff_len + 1);	// extra space for null terminator, "just in case"
+	std::fill(buff.begin(), buff.end(), '\0');
 	SHORT ret = SadGetParam(DSC, param, record, 1, &buff[0], buff_len);
-	if (ret)
+	if (ret != CSI_Okay)
 	{
 		ReportSadError(ret);
 	}
@@ -101,27 +127,11 @@ std::string CAMbase::ReturnStringParam(ULONG param, USHORT record, USHORT buff_l
 }
 
 
-LONG CAMbase::ReturnRecordCount(const USHORT class_code)
-{
-	USHORT count;
-	SHORT ret = SadClassCount(DSC, class_code, &count);
-	if (ret)
-	{
-		ReportSadError(ret);
-		count = 0;
-	}
-	return count;
-}
-
-
 void CAMbase::ReportSadError(const SHORT error_code)
 {
-	SHORT srtv, sdummy;
+	SHORT sdummy;
 	USHORT usdummy;
 	ULONG ulrtv;
 	SadGetStatus(DSC, &ulrtv, &sdummy, &usdummy);
-	std::cerr << "SAD Error: ";
-	std::cerr.setf(std::ios::hex, std::ios::basefield);  // set hex as the basefield
-	std::cerr.setf(std::ios::showbase); 
-	std::cerr << ulrtv << std::endl;
+	TRACE("\nSAD Error: 0x%10x\n", ulrtv);
 }

@@ -5,10 +5,12 @@
 #pragma once
 #include "afxwin.h"
 #include "afxcmn.h"
+#include <vector>
+#include <string>
+
 #include "ProgramDefaults.h"
 #include "CNFobject.h"
-//#include "AuxillaryFunctions.h"
-#include <vector>
+#include "NLBobject.h"
 
 // CtabulateDlg dialog
 class CtabulateDlg : public CDialogEx
@@ -69,6 +71,7 @@ private:
 	int DatFileCount;
 	double EnergyTolerance;
 	CNFobject dataset;
+	NLBobject libdataset;
 
 private:
 	void VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, const CListBox* ptrListBox);

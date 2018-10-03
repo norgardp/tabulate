@@ -7,5 +7,5 @@
 struct LibraryStruct
 {
 	std::string NuclideName;		// CAM_T_NCLNAME
-	std::vector<REAL> PeakEnergy;	// CAM_F_NLENERGY
+	std::vector<FLOAT> PeakEnergy;	// CAM_F_NLENERGY
 };
