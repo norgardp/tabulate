@@ -64,13 +64,13 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BTN_SELECTDIR, SelectDataDir);
 	DDX_Control(pDX, IDC_EDIT_ENERGYTOL, PSEnergyTolerance);
 	DDX_Control(pDX, IDC_OUTPUTDESC, OutputDescription);
-	//DDX_Control(pDX, IDC_LIST_NLB_FILELISTING, LibraryContent);
-	DDX_Control(pDX, IDC_RADIO_OPTA, OutputOption);
+	DDX_Control(pDX, IDC_RADIO_OPTA, OutputOptionRB);
 	DDX_Control(pDX, IDC_LIST_CNFFILESFORANALYSIS, DataFileListing);
 	DDX_Control(pDX, IDC_LIST_LIBFILESINDIR, LibraryFileListing);
 	DDX_Control(pDX, IDC_STC_DATDIR, labelDataDir);
 	DDX_Control(pDX, IDC_STC_LIBDIR, labelLibDir);
 	DDX_Control(pDX, IDC_LIST_LIBCONTENT, LibraryContentListing);
+	DDX_Control(pDX, IDC_CHK_OVERWRITE, OverwriteMode);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -85,8 +85,8 @@ BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_FILEINSERT, &CtabulateDlg::OnBnClickedBtnFileinsert)
 	ON_BN_CLICKED(IDC_BTN_FILEREMOVE, &CtabulateDlg::OnBnClickedBtnFileremove)
 	ON_EN_KILLFOCUS(IDC_EDIT_ENERGYTOL, &CtabulateDlg::OnEnKillfocusEditEnergytol)
-	//ON_LBN_SELCHANGE(IDC_LIST_LIBFILESINDIR, &CtabulateDlg::OnLbnSelchangeListLibFilesInDir)
 	ON_BN_CLICKED(IDC_BUTTON1, &CtabulateDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDOK, &CtabulateDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -135,6 +135,7 @@ BOOL CtabulateDlg::OnInitDialog()
 	VectorizeDirectoryListing(&DatFiles, &DataFileListing);
 
 	SetEnergyTolerance(default_energy_tolerance);
+	
 	// ===================== LOCAL INITIALIZATION =====================
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -391,21 +392,132 @@ CString CtabulateDlg::GetListBoxSelection(const int i)
 
 void CtabulateDlg::OnBnClickedButton1()
 {
+	CString string_to_add;
+	std::string library_name{ ReturnLibraryFilename() };
+	std::string formatted_data;
+	int sel = LibraryFileListing.GetCurSel();
+	if (sel != LB_ERR)
+	{
+		LibraryContentListing.ResetContent();
+
+		NLBobject nlb(library_name);
+		nlb.PopulateDataStruct();
+
+		size_t nuclide_count{ nlb.ReturnNuclideCount() };
+		for (size_t i{ 0 }; i < nuclide_count; i++)
+		{
+			formatted_data = nlb.ReturnFormattedLine(i);
+			string_to_add = formatted_data.c_str();
+			LibraryContentListing.AddString(string_to_add);
+		}
+		SetListboxScrollbar(LibraryContentListing);
+	}
+}
+
+
+void CtabulateDlg::SetListboxScrollbar(CListBox& listbox)
+// Resize horizontal scroll bar text extents to fit the text that is in the
+// listbox.
+{
+	CString str;
+	CSize sz;
+	int dx{ 0 };
+	TEXTMETRIC tm;
+	CDC* pDC = listbox.GetDC();
+	CFont* pFont = listbox.GetFont();
+
+	CFont* pOldFont = pDC->SelectObject(pFont);
+	pDC->GetTextMetrics(&tm);
+
+	for (int i{ 0 }; i < listbox.GetCount(); i++)
+	{
+		listbox.GetText(i, str);
+		sz = pDC->GetTextExtent(str);
+		if (sz.cx > dx)
+			dx = sz.cx;
+	}
+
+	pDC->SelectObject(pOldFont);
+	listbox.ReleaseDC(pDC);
+
+	listbox.SetHorizontalExtent(dx);
+}
+
+void CtabulateDlg::OnBnClickedOk()
+{
+	std::string libname{ ReturnLibraryFilename() }; 
+	bool overwrite{ ReturnOverwriteState() };
+	OutputOption output{ ReturnOutputOption() };
+	
+	int data_count{ LibraryContentListing.GetCount() };
+	for (int i{ 0 }; i < data_count; i++)
+	{
+		CNFobject data(libname, overwrite, output);
+		data.CreateInstance(ReturnDataFilename(i));		// < ----- Stopped here
+	}
+
+	CDialogEx::OnOK();
+}
+
+
+std::string CtabulateDlg::ReturnLibraryFilename()
+{
+	std::string ret;
 	CString libfile{ default_genie_library_directory };
 	int sel = LibraryFileListing.GetCurSel();
 	if (sel != LB_ERR)
-		libfile += GetListBoxSelection(sel);
-	std::string test{ CW2A(libfile) };
-	
-	LibraryContentListing.ResetContent();
-
-	NLBobject nlb(test);
-	
-	size_t nuclide_count{ nlb.ReturnNuclideCount() };
-	for (size_t i{ 0 }; i < nuclide_count; i++)
 	{
-		test = nlb.ReturnFormattedLine(i);
-		libfile = test.c_str();
-		LibraryContentListing.AddString(libfile);
+		libfile += GetListBoxSelection(sel);
+		ret = CW2A(libfile);
 	}
+	return ret;
+}
+
+
+std::string CtabulateDlg::ReturnDataFilename(const int i) // <-- Add to header file
+{
+	std::string ret;
+	CString datfile{ default_genie_data_directory };
+	int sel = DataFileListing.GetCurSel();
+	if (sel != LB_ERR)
+	{
+		datfile += GetListBoxSelection(datalistbox, sel);	// < --- Create a generic version of this to work w/ ReturnDataFilename and ReturnLibraryFilename
+		ret = CW2A(datfile);
+	}
+	return ret;
+}
+
+
+bool CtabulateDlg::ReturnOverwriteState()
+{
+	UINT overwrite{ OverwriteMode.GetState() };
+	return (overwrite == BST_CHECKED) ? true : false;
+}
+
+
+OutputOption CtabulateDlg::ReturnOutputOption()
+{
+	OutputOption outoption;
+	switch (OutputOptionRB.GetCheck())
+	{
+	case IDC_RADIO_OPTA:
+		outoption = OutputOption::a;
+		break;
+
+	case IDC_RADIO_OPTB:
+		outoption = OutputOption::b;
+		break;
+
+	case IDC_RADIO_OPTC:
+		outoption = OutputOption::c;
+		break;
+
+	case IDC_RADIO_OPTD:
+		outoption = OutputOption::d;
+		break;
+
+	default:
+		outoption = OutputOption::none;
+	}
+	return outoption;
 }

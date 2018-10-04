@@ -8,6 +8,9 @@
 #define GENIE_MAX_ETOL 5.0
 #define GENIE_MIN_ETOL 0.1
 
+// Time string lengths
+#define GENIE_MAX_TIMESTRING 21
+
 // Default directories
 static constexpr TCHAR* default_genie_data_directory = _T("c:\\genie2k\\camfiles\\");
 static constexpr TCHAR* default_genie_library_directory = _T("c:\\genie2k\\camfiles\\");

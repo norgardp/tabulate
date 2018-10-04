@@ -1,0 +1,1 @@
+This is the folder where documentation will be stored. For now, it is empty.

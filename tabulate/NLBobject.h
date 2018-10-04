@@ -22,22 +22,22 @@ public:
 	NLBobject();
 	~NLBobject();
 	NLBobject(const std::string name);
+	NLBobject(const _bstr_t name);
 
-private:
-	std::vector<LibraryStruct> libData;
-	LONG nuclide_cnt;
-	LONG line_cnt;
-
-public:
 	size_t ReturnNuclideCount();
+	void PopulateDataStruct();
 	std::string ReturnFormattedLine(const size_t i);
+	LibraryDimension& ReturnLibraryDimension();
 
 private:
-	void PopulateDataStruct();
 	void GetLibraryDimensions();
 	void ResizeDataSetObject();
 	void PopulateNuclideNames();
 	void PopulateNuclideLines();
 	std::string ReturnEnergyList(const size_t i);
+
+private:
+	std::vector<LibraryStruct> libData;
+	LibraryDimension libDim;
 };
 

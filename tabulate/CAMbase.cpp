@@ -39,7 +39,7 @@ void CAMbase::CreateDataSourceContext()
 }
 
 
-void CAMbase::OpenFile(const std::string name,
+void CAMbase::OpenFile(const std::string& name,
 	const CanberraDataAccessLib::OpenMode om,
 	const CanberraDataAccessLib::CloseMode cm)
 {
@@ -53,7 +53,7 @@ void CAMbase::OpenFile(const std::string name,
 }
 
 
-void CAMbase::OpenFile(const std::string name)
+void CAMbase::OpenFile(const std::string& name)
 {
 	CreateDataAccessInterface();
 	
@@ -65,7 +65,14 @@ void CAMbase::OpenFile(const std::string name)
 }
 
 
-void CAMbase::SetFilename(const std::string name)
+void CAMbase::OpenFile(const _bstr_t& name)
+{
+	std::string ret{ ConvertBSTR(name) };
+	OpenFile(ret);
+}
+
+
+void CAMbase::SetFilename(const std::string& name)
 {
 	if (!name.empty())
 		file_name = name.c_str();
@@ -127,6 +134,33 @@ std::string CAMbase::ReturnStringParam(ULONG param, USHORT record, USHORT buff_l
 }
 
 
+double CAMbase::ReturnCAMTime(ULONG param, USHORT record)
+{
+	double cam_time;
+	SHORT ret = SadGetParam(DSC, param, record, 1, &cam_time, sizeof(cam_time));
+	if (ret != CSI_Okay)
+	{
+		ReportSadError(ret);
+		cam_time = 0.0;
+	}
+	return cam_time;
+}
+
+
+std::string CAMbase::ReturnTimeSParam(ULONG param, USHORT record)
+{
+	double cam_time;
+	cam_time = ReturnCAMTime(param, record);
+	return ConvertCAMTimeToString(cam_time);
+}
+
+
+double CAMbase::ReturnTimeNParam(ULONG param, USHORT record)
+{
+	return ReturnCAMTime(param, record);
+}
+
+
 void CAMbase::ReportSadError(const SHORT error_code)
 {
 	SHORT sdummy;
@@ -134,4 +168,34 @@ void CAMbase::ReportSadError(const SHORT error_code)
 	ULONG ulrtv;
 	SadGetStatus(DSC, &ulrtv, &sdummy, &usdummy);
 	TRACE("\nSAD Error: 0x%10x\n", ulrtv);
+}
+
+
+std::string CAMbase::ConvertBSTR(const _bstr_t& str)
+{
+	size_t len = str.length();
+	std::vector<char> outstring;
+	outstring.resize(len);
+	strcpy_s(&outstring[0], len + 1, str);
+	std::string ret{ &outstring[0] };
+	return ret;
+}
+
+
+std::string CAMbase::ConvertCAMTimeToString(const double& cam_time)
+{
+	tm time;
+	fUtlCAMToCTime(cam_time, &time);
+	return ConvertCTimeToString(time);
+}
+
+
+std::string CAMbase::ConvertCTimeToString(const tm& t)
+{
+	std::string time_fmt{ "%d-%b-%Y %H:%M:%S" };
+	std::vector<char> time_str;
+	time_str.resize(GENIE_MAX_TIMESTRING);
+	strftime(&time_str[0], time_str.size(), time_fmt.c_str(), &t);
+	std::string ret{ time_str[0] };
+	return ret;
 }

@@ -10,9 +10,13 @@ NLBobject::NLBobject()
 NLBobject::NLBobject(const std::string name)
 {
 	OpenFile(name);
-	PopulateDataStruct();
 }
 
+
+NLBobject::NLBobject(const _bstr_t name)
+{
+	OpenFile(name);
+}
 
 NLBobject::~NLBobject()
 {
@@ -31,21 +35,21 @@ void NLBobject::PopulateDataStruct()
 
 void NLBobject::GetLibraryDimensions()
 {
-	nuclide_cnt = ReturnRecordCount(CAM_CLS_NUCL);
-	line_cnt = ReturnRecordCount(CAM_CLS_NLINES);
+	libDim.NumberOfNuclides = ReturnRecordCount(CAM_CLS_NUCL);
+	libDim.NumberOfLines = ReturnRecordCount(CAM_CLS_NLINES);
 }
 
 
 void NLBobject::ResizeDataSetObject()
 {
-	libData.resize((size_t)nuclide_cnt);
+	libData.resize((size_t)libDim.NumberOfNuclides);
 }
 
 
 void NLBobject::PopulateNuclideNames()
 {
 	USHORT record;
-	for (USHORT i{ 0 }; i < nuclide_cnt; i++)
+	for (USHORT i{ 0 }; i < libDim.NumberOfNuclides; i++)
 	{
 		record = i + 1;
 		libData.at(i).NuclideName = ReturnStringParam(CAM_T_NCLNAME, record, CAM_N_NCLNAME);
@@ -59,7 +63,7 @@ void NLBobject::PopulateNuclideLines()
 	LONG line{ 0 };
 	LONG nuclide_no{ 0 };
 	FLOAT energy{ 0.0 };
-	for (USHORT i{ 0 }; i < line_cnt; i++)
+	for (USHORT i{ 0 }; i < libDim.NumberOfLines; i++)
 	{
 		record = i + 1;
 		energy = ReturnNumericParam(CAM_F_NLENERGY, record, energy);
@@ -72,7 +76,7 @@ void NLBobject::PopulateNuclideLines()
 
 size_t NLBobject::ReturnNuclideCount()
 {
-	size_t size{ (size_t)nuclide_cnt };
+	size_t size{ (size_t)libDim.NumberOfNuclides };
 	return size;
 }
 
@@ -80,7 +84,9 @@ size_t NLBobject::ReturnNuclideCount()
 std::string NLBobject::ReturnFormattedLine(const size_t i)
 {
 	std::string outstring{ libData.at(i).NuclideName };
-	outstring += "      ";
+	size_t current_size{ outstring.size() };
+	for (size_t j{ 15 - current_size }; j > 0; j--)
+		outstring.push_back(' ');
 	outstring += ReturnEnergyList(i);
 	return outstring;
 }
@@ -98,4 +104,10 @@ std::string NLBobject::ReturnEnergyList(const size_t i)
 	}
 	outstring += "\n";
 	return outstring;
+}
+
+
+LibraryDimension& NLBobject::ReturnLibraryDimension()
+{
+	return libDim;
 }
