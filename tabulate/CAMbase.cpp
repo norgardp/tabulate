@@ -196,6 +196,15 @@ std::string CAMbase::ConvertCTimeToString(const tm& t)
 	std::vector<char> time_str;
 	time_str.resize(GENIE_MAX_TIMESTRING);
 	strftime(&time_str[0], time_str.size(), time_fmt.c_str(), &t);
-	std::string ret{ time_str[0] };
+	std::string ret(time_str.data(), time_str.size());
 	return ret;
+}
+
+
+void CAMbase::SetStringParam(ULONG param, USHORT record, std::string& data, USHORT buff_len)
+{
+	std::string locdata{ data };
+	SHORT ret = SadPutParam(DSC, param, record, 1, &locdata[0], buff_len);
+	if (ret)
+		ReportSadError(ret);
 }

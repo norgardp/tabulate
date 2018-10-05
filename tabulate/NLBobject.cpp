@@ -111,3 +111,9 @@ LibraryDimension& NLBobject::ReturnLibraryDimension()
 {
 	return libDim;
 }
+
+
+std::vector<LibraryStruct>& NLBobject::ReturnLibraryData()
+{
+	return libData;
+}

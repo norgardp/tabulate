@@ -11,6 +11,7 @@
 #include "ProgramDefaults.h"
 #include "CNFobject.h"
 #include "NLBobject.h"
+#include "LibraryStruct.h"
 
 // CtabulateDlg dialog
 class CtabulateDlg : public CDialogEx
@@ -48,6 +49,8 @@ public:
 	CStatic labelDataDir;
 	CStatic labelLibDir;
 	CButton OverwriteMode;
+	CListBox AnalysisFileListing;
+	int OutputOptionRB{ 0 };
 
 	afx_msg void OnBnClickedRadioOpta();
 	afx_msg void OnBnClickedRadioOptb();
@@ -62,18 +65,19 @@ public:
 	afx_msg void OnBnClickedOk();
 
 private:
-	void SetEnergyTolerance(const double f);
-	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
-	bool ReturnOverwriteState();
-
 	CString DataDirectory;
 	CString AnalysisDirectory;
 	std::vector<CString> DatFiles;
+	std::vector<LibraryStruct> libraryData;
 	int LibFileCount;
 	int DatFileCount;
 	double EnergyTolerance;
+	
 
 private:
+	void SetEnergyTolerance(const double f);
+	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
+	bool ReturnOverwriteState();
 	void VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, const CListBox* ptrListBox);
 	int GetListBoxCount(CListBox* listbox);
 	void PrepareVectorForList(std::vector<CString>* listvector, int newcount);
@@ -88,10 +92,4 @@ private:
 	DataStructure::InitializationOptions ObtainInitializationOptions();
 	void ButtonHandler();
 
-public:
-	
-
-	CListBox AnalysisFileListing;
-	int OutputOptionRB{ 0 };
-	
 };

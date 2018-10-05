@@ -36,12 +36,13 @@ public:
 	std::string ReturnStringParam(ULONG param, USHORT  record, USHORT buff_len);
 	template<typename T>
 	const T ReturnNumericParam(ULONG param, USHORT record, const T& type);
-	template<typename T>
-	void SetNumericParam(ULONG param, USHORT record, const T& type);
+	
 	std::string ReturnTimeSParam(ULONG param, USHORT record);
 	double ReturnTimeNParam(ULONG param, USHORT record);
 
-	
+	template<typename T>
+	void SetNumericParam(ULONG param, USHORT record, const T& type);
+	void SetStringParam(ULONG param, USHORT record, std::string& data, USHORT buff_len);
 
 private:
 	void CreateDataAccessInterface();
@@ -80,4 +81,6 @@ void CAMbase::SetNumericParam(ULONG param, USHORT record, const T& data)
 {
 	T locdata{ data };
 	SHORT ret = SadPutParam(DSC, param, record, 1, &locdata, sizeof(locdata));
+	if (ret)
+		ReportSadError(ret);
 }

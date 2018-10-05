@@ -450,6 +450,8 @@ void CtabulateDlg::OnBnClickedLibrarySelect()
 			LibraryContentListing.AddString(string_to_add);
 		}
 		SetListboxScrollbar(LibraryContentListing);
+
+		libraryData = nlb.ReturnLibraryData();
 	}
 }
 
@@ -486,7 +488,7 @@ void CtabulateDlg::OnBnClickedOk()
 {
 	DataStructure::InitializationOptions options;
 	options = ObtainInitializationOptions();
-	
+
 	int data_count{ LibraryContentListing.GetCount() };
 	for (int i{ 0 }; i < data_count; i++)
 	{

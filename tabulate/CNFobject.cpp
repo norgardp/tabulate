@@ -109,6 +109,7 @@ void CNFobject::OpenDatafile(const std::string& datafile)
 	}
 	OpenFile(datafile, open_mode, close_mode);
 	PushEnergyToleranceToFile();
+	//PushNIDLibraryToFile();
 }
 
 
@@ -137,7 +138,7 @@ void CNFobject::GetLibraryDimensions()
 
 void CNFobject::PopulateDataStructure()
 {
-	GetLibraryDimensions();
+	//GetLibraryDimensions();
 	ResizeDataStructure();
 	PopulateHeaderStructure();
 	PopulateNuclideData();
@@ -153,18 +154,11 @@ void CNFobject::ResizeDataStructure()
 void CNFobject::PopulateHeaderStructure()
 {
 	psData.SampleID = ReturnStringParam(CAM_T_SIDENT, 0, CAM_N_SIDENT);
-	psData.SampleQuantity = ReturnNumericParam(CAM_F_SQUANT, 0, sizeof(psData.SampleQuantity));
-	psData.AcquisitionStart = ReturnTimeSParam(CAM_X_ELIVE, 0);
+	psData.AcquisitionStart = ReturnTimeSParam(CAM_X_ASTIME, 0);
 	psData.LiveTime = ReturnTimeNParam(CAM_X_ELIVE, 0);
 	psData.RealTime = ReturnTimeNParam(CAM_X_EREAL, 0);
-	psData.PileupFactor = ReturnNumericParam(CAM_F_PILEUP, 0, sizeof(FLOAT));
-	psData.CorrectedLiveTime2 = ReturnTimeNParam(CAM_X_PPELIVE, 0);
-
+	psData.CorrectedLiveTime = ReturnTimeNParam(CAM_X_PPELIVE, 0);
 	psData.DeadTimePct = 100 * (psData.RealTime - psData.LiveTime) / psData.RealTime;
-
-	double num = psData.LiveTime;
-	double den = exp(psData.PileupFactor*(psData.RealTime / psData.LiveTime - 1));
-	psData.CorrectedLiveTime = num / den;
 }
 
 
@@ -177,4 +171,11 @@ void CNFobject::PushEnergyToleranceToFile()
 {
 	USHORT rec{ 1 };
 	SetNumericParam(CAM_F_TOLERANCE, rec, energy_tolerance);
+}
+
+
+void CNFobject::PushNIDLibraryToFile()
+{
+	USHORT rec{ 1 };
+
 }

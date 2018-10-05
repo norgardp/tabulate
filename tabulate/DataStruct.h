@@ -28,13 +28,13 @@ namespace DataStructure
 	struct DataStruct
 	{
 		std::string SampleID;			// CAM_L_SIDENT
-		double SampleQuantity;			// CAM_F_SQUANT
+		//double SampleQuantity;			// CAM_F_SQUANT
 		std::string AcquisitionStart;	// CAM_X_ASTIME
 		double RealTime;				// CAM_X_EREAL
 		double LiveTime;				// CAM_X_ELIVE
-		double PileupFactor;			// CAM_F_PILEUP
-		double CorrectedLiveTime;		// Tlive/exp[PF*(Treal/Tlive - 1)]; PF = CAM_F_PILEUP
-		double CorrectedLiveTime2;		// CAM_X_PPELIVE
+		//double PileupFactor;			// CAM_F_PILEUP
+		//double CorrectedLiveTime;		// Tlive/exp[PF*(Treal/Tlive - 1)]; PF = CAM_F_PILEUP
+		double CorrectedLiveTime;		// CAM_X_PPELIVE
 		double DeadTimePct;				// 100*(Treal-Tlive)/Treal
 		std::vector<DataStructure::NuclideStructure::NuclideStruct> Nuclides;
 	};

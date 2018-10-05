@@ -28,6 +28,7 @@ public:
 	void PopulateDataStruct();
 	std::string ReturnFormattedLine(const size_t i);
 	LibraryDimension& ReturnLibraryDimension();
+	std::vector<LibraryStruct>& ReturnLibraryData();
 
 private:
 	void GetLibraryDimensions();

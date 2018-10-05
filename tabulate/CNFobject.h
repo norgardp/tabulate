@@ -43,6 +43,7 @@ private:
 	void PopulateHeaderStructure();
 	void PopulateNuclideData();
 	void PushEnergyToleranceToFile();
+	void PushNIDLibraryToFile();
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
