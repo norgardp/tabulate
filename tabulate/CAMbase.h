@@ -35,9 +35,13 @@ public:
 	LONG ReturnRecordCount(const USHORT class_code); 
 	std::string ReturnStringParam(ULONG param, USHORT  record, USHORT buff_len);
 	template<typename T>
-	const T& ReturnNumericParam(ULONG param, USHORT record, const T& type);
+	const T ReturnNumericParam(ULONG param, USHORT record, const T& type);
+	template<typename T>
+	void SetNumericParam(ULONG param, USHORT record, const T& type);
 	std::string ReturnTimeSParam(ULONG param, USHORT record);
 	double ReturnTimeNParam(ULONG param, USHORT record);
+
+	
 
 private:
 	void CreateDataAccessInterface();
@@ -62,11 +66,18 @@ protected:
 
 
 template<typename T>
-const T& CAMbase::ReturnNumericParam(ULONG param, USHORT record, const T& type)
+const T CAMbase::ReturnNumericParam(ULONG param, USHORT record, const T& type)
 {
 	T retval;
 	SHORT ret = SadGetParam(DSC, param, record, 1, &retval, sizeof(type));
 	if (ret)
 		ReportSadError(ret);
 	return retval;
+}
+
+template<typename T>
+void CAMbase::SetNumericParam(ULONG param, USHORT record, const T& data)
+{
+	T locdata{ data };
+	SHORT ret = SadPutParam(DSC, param, record, 1, &locdata, sizeof(locdata));
 }

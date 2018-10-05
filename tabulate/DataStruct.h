@@ -1,7 +1,13 @@
 #pragma once
 
+// Standard library
 #include <string>
 #include <vector>
+
+// This program
+#include "OutputOptions.h"
+
+// Genie
 #include "citypes.h"
 
 namespace DataStructure
@@ -22,7 +28,7 @@ namespace DataStructure
 	struct DataStruct
 	{
 		std::string SampleID;			// CAM_L_SIDENT
-		float SampleQuantity;			// CAM_F_SQUANT
+		double SampleQuantity;			// CAM_F_SQUANT
 		std::string AcquisitionStart;	// CAM_X_ASTIME
 		double RealTime;				// CAM_X_EREAL
 		double LiveTime;				// CAM_X_ELIVE
@@ -31,6 +37,15 @@ namespace DataStructure
 		double CorrectedLiveTime2;		// CAM_X_PPELIVE
 		double DeadTimePct;				// 100*(Treal-Tlive)/Treal
 		std::vector<DataStructure::NuclideStructure::NuclideStruct> Nuclides;
+	};
+
+	struct InitializationOptions
+	{
+		std::string Library;
+		std::string Analysis;
+		bool OverwriteMode;
+		OutputOption OutputFormat;
+		double EnergyTolerance;
 	};
 
 }

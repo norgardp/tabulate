@@ -4,7 +4,13 @@
 
 CNFobject::CNFobject()
 {
+}
+
+
+CNFobject::CNFobject(const DataStructure::InitializationOptions& options)
+{
 	InitializeSequenceAnalyzer();
+	UnpackInitilizerStruct(options);
 }
 
 
@@ -12,7 +18,7 @@ CNFobject::CNFobject(const std::string lib_name,
 	const bool overwrite, 
 	const OutputOption output_opt)
 {
-	CNFobject();
+	InitializeSequenceAnalyzer();
 	SetLibraryFilename(lib_name);
 	SetOverwriteMode(overwrite);
 	SetOutputOption(output_opt);
@@ -38,6 +44,19 @@ void CNFobject::SetLibraryFilename(const std::string name)
 }
 
 
+void CNFobject::SetAnalysisFilename(const std::string name)
+{
+	if (!name.empty())
+		analysis_name = name.c_str();
+}
+
+
+void CNFobject::SetEnergyTolerance(const double tol)
+{
+	energy_tolerance = tol;
+}
+
+
 void CNFobject::SetOutputOption(const OutputOption option)
 {
 	output_option = option;
@@ -49,6 +68,15 @@ void CNFobject::SetOverwriteMode(const bool mode)
 	overwrite = mode;
 }
 
+
+void CNFobject::UnpackInitilizerStruct(const DataStructure::InitializationOptions& init)
+{
+	SetLibraryFilename(init.Library);
+	SetAnalysisFilename(init.Analysis);
+	SetOverwriteMode(init.OverwriteMode);
+	SetOutputOption(init.OutputFormat);
+	SetEnergyTolerance(init.EnergyTolerance);
+}
 
 void CNFobject::CreateInstance(const std::string& datafile)
 {
@@ -72,11 +100,15 @@ void CNFobject::OpenDatafile(const std::string& datafile)
 		}
 		else
 		{
-			open_mode = CanberraDataAccessLib::OpenMode::dReadOnly;
+			// If overwrite == false, then the data file still needs to be open
+			// in read/write mode to permit the modification of the energy
+			// tolerance used for the NID routine.
+			open_mode = CanberraDataAccessLib::OpenMode::dReadWrite;
 			close_mode = CanberraDataAccessLib::CloseMode::dNoUpdate;
 		}
 	}
 	OpenFile(datafile, open_mode, close_mode);
+	PushEnergyToleranceToFile();
 }
 
 
@@ -84,14 +116,14 @@ void CNFobject::PerformAnalysis()
 {
 	_bstr_t fake;
 	if (pSequenceAnalyzer != nullptr)
-		pSequenceAnalyzer->Analyze(pDataAccess, &start_step, library_name, 
+		pSequenceAnalyzer->Analyze(pDataAccess, &start_step, analysis_name, 
 			FALSE, FALSE, FALSE, TRUE, fake, NULL);
 }
 
 
 std::string CNFobject::ReturnFormattedLine()
 {
-	// NOT DONE HERE
+	// NOT DONE HERE ================================================================== NOT DONE HERE
 	return std::string();
 }
 
@@ -138,5 +170,11 @@ void CNFobject::PopulateHeaderStructure()
 
 void CNFobject::PopulateNuclideData()
 {
+	//==============================================================  NOT DONE HERE EITHER
+}
 
+void CNFobject::PushEnergyToleranceToFile()
+{
+	USHORT rec{ 1 };
+	SetNumericParam(CAM_F_TOLERANCE, rec, energy_tolerance);
 }

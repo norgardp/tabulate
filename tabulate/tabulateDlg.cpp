@@ -52,6 +52,7 @@ END_MESSAGE_MAP()
 
 CtabulateDlg::CtabulateDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_TABULATE_DIALOG, pParent)
+	, OutputOptionRB(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -59,34 +60,34 @@ CtabulateDlg::CtabulateDlg(CWnd* pParent /*=NULL*/)
 void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_BTN_FILEINSERT, InsertFile);
-	DDX_Control(pDX, IDC_BTN_FILEREMOVE, RemoveFile);
 	DDX_Control(pDX, IDC_BTN_SELECTDIR, SelectDataDir);
 	DDX_Control(pDX, IDC_EDIT_ENERGYTOL, PSEnergyTolerance);
 	DDX_Control(pDX, IDC_OUTPUTDESC, OutputDescription);
-	DDX_Control(pDX, IDC_RADIO_OPTA, OutputOptionRB);
 	DDX_Control(pDX, IDC_LIST_CNFFILESFORANALYSIS, DataFileListing);
 	DDX_Control(pDX, IDC_LIST_LIBFILESINDIR, LibraryFileListing);
+	DDX_Control(pDX, IDC_LIST_ASFFILESINDIR, AnalysisFileListing);
 	DDX_Control(pDX, IDC_STC_DATDIR, labelDataDir);
 	DDX_Control(pDX, IDC_STC_LIBDIR, labelLibDir);
 	DDX_Control(pDX, IDC_LIST_LIBCONTENT, LibraryContentListing);
 	DDX_Control(pDX, IDC_CHK_OVERWRITE, OverwriteMode);
+	DDX_Radio(pDX, IDC_RADIO_OPTA, (int&)OutputOptionRB);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_RADIO_OPTA, &CtabulateDlg::OnBnClickedRadioOptA)
-	ON_BN_CLICKED(IDC_RADIO_OPTB, &CtabulateDlg::OnBnClickedRadioOptb)
-	ON_BN_CLICKED(IDC_RADIO_OPTC, &CtabulateDlg::OnBnClickedRadioOptc)
-	ON_BN_CLICKED(IDC_RADIO_OPTD, &CtabulateDlg::OnBnClickedRadioOptd)
+	ON_BN_CLICKED(IDOK, &CtabulateDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_BTN_SELECTDIR, &CtabulateDlg::OnBnClickedBtnSelectDir)
 	ON_BN_CLICKED(IDC_BTN_FILEINSERT, &CtabulateDlg::OnBnClickedBtnFileinsert)
 	ON_BN_CLICKED(IDC_BTN_FILEREMOVE, &CtabulateDlg::OnBnClickedBtnFileremove)
+	ON_BN_CLICKED(IDC_BTN_LIBRARYSELECT, &CtabulateDlg::OnBnClickedLibrarySelect)
+	ON_BN_CLICKED(IDC_BTN_FILEREMOVEALL, &CtabulateDlg::OnBnClickedBtnFileremoveall)
 	ON_EN_KILLFOCUS(IDC_EDIT_ENERGYTOL, &CtabulateDlg::OnEnKillfocusEditEnergytol)
-	ON_BN_CLICKED(IDC_BUTTON1, &CtabulateDlg::OnBnClickedButton1)
-	ON_BN_CLICKED(IDOK, &CtabulateDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_RADIO_OPTA, &CtabulateDlg::OnBnClickedRadioOpta)
+	ON_BN_CLICKED(IDC_RADIO_OPTB, &CtabulateDlg::OnBnClickedRadioOptb)
+	ON_BN_CLICKED(IDC_RADIO_OPTC, &CtabulateDlg::OnBnClickedRadioOptc)
+	ON_BN_CLICKED(IDC_RADIO_OPTD, &CtabulateDlg::OnBnClickedRadioOptd)
 END_MESSAGE_MAP()
 
 
@@ -131,11 +132,13 @@ BOOL CtabulateDlg::OnInitDialog()
 	labelDataDir.SetWindowTextW(default_genie_data_directory);
 	ListDirectory(&DataFileListing, default_genie_data_directory, default_data_extension);
 
-	VectorizeDirectoryListing(&LibFiles, &LibraryFileListing); 
+	ListDirectory(&AnalysisFileListing, default_genie_control_directory, default_analysis_extension);
+
 	VectorizeDirectoryListing(&DatFiles, &DataFileListing);
 
 	SetEnergyTolerance(default_energy_tolerance);
-	
+	OnBnClickedRadioOpta();
+
 	// ===================== LOCAL INITIALIZATION =====================
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -191,31 +194,60 @@ HCURSOR CtabulateDlg::OnQueryDragIcon()
 }
 
 
-void CtabulateDlg::OnBnClickedRadioOptA()
+void CtabulateDlg::ButtonHandler()
 {
-	OutputDescription.SetWindowTextW(output_option_a);
+	TCHAR* outstring;
+
+	switch (OutputOptionRB)
+	{
+	case 0:
+		outstring = output_option_a;
+		break;
+
+	case 1:
+		outstring = output_option_b;
+		break;
+
+	case 2:
+		outstring = output_option_c;
+		break;
+
+	case 3:
+		outstring = output_option_d;
+		break;
+
+	default:
+		outstring = _T("no selection");
+	}
+	OutputDescription.SetWindowTextW(outstring);
 	UpdateData(FALSE);
+}
+
+void CtabulateDlg::OnBnClickedRadioOpta()
+{
+	UpdateData();
+	ButtonHandler();
 }
 
 
 void CtabulateDlg::OnBnClickedRadioOptb()
 {
-	OutputDescription.SetWindowTextW(output_option_b);
-	UpdateData(FALSE);
+	UpdateData();
+	ButtonHandler();
 }
 
 
 void CtabulateDlg::OnBnClickedRadioOptc()
 {
-	OutputDescription.SetWindowTextW(output_option_c);
-	UpdateData(FALSE);
+	UpdateData();
+	ButtonHandler();
 }
 
 
 void CtabulateDlg::OnBnClickedRadioOptd()
 {
-	OutputDescription.SetWindowTextW(output_option_d);
-	UpdateData(FALSE);
+	UpdateData();
+	ButtonHandler();
 }
 
 
@@ -224,6 +256,7 @@ void CtabulateDlg::SetEnergyTolerance(const double f)
 	CString str;
 	str.Format(_T("%1.2f"), f);
 	PSEnergyTolerance.SetWindowTextW(str);
+	EnergyTolerance = f;
 }
 
 
@@ -340,6 +373,12 @@ void CtabulateDlg::OnBnClickedBtnFileremove()
 }
 
 
+void CtabulateDlg::OnBnClickedBtnFileremoveall()
+{
+	DataFileListing.ResetContent();
+}
+
+
 void CtabulateDlg::PopulateListBoxItems(CListBox* listbox, 
 	std::vector<CString>* data)
 // Push the contents of a std::vector<CString> into the listbox. This is used
@@ -382,15 +421,15 @@ void CtabulateDlg::OnEnKillfocusEditEnergytol()
 }
 
 
-CString CtabulateDlg::GetListBoxSelection(const int i)
+CString CtabulateDlg::GetListBoxSelection(const CListBox& listbox, const int i)
 {
 	CString selected_text;
-	LibraryFileListing.GetText(i, selected_text);
+	listbox.GetText(i, selected_text);
 	return selected_text;
 }
 
 
-void CtabulateDlg::OnBnClickedButton1()
+void CtabulateDlg::OnBnClickedLibrarySelect()
 {
 	CString string_to_add;
 	std::string library_name{ ReturnLibraryFilename() };
@@ -445,18 +484,27 @@ void CtabulateDlg::SetListboxScrollbar(CListBox& listbox)
 
 void CtabulateDlg::OnBnClickedOk()
 {
-	std::string libname{ ReturnLibraryFilename() }; 
-	bool overwrite{ ReturnOverwriteState() };
-	OutputOption output{ ReturnOutputOption() };
+	DataStructure::InitializationOptions options;
+	options = ObtainInitializationOptions();
 	
 	int data_count{ LibraryContentListing.GetCount() };
 	for (int i{ 0 }; i < data_count; i++)
 	{
-		CNFobject data(libname, overwrite, output);
-		data.CreateInstance(ReturnDataFilename(i));		// < ----- Stopped here
+		CNFobject data(options);
+		data.CreateInstance(ReturnDataFilename(i));
 	}
+}
 
-	CDialogEx::OnOK();
+
+DataStructure::InitializationOptions CtabulateDlg::ObtainInitializationOptions()
+{
+	DataStructure::InitializationOptions options;
+	options.Library = ReturnLibraryFilename();
+	options.Analysis = ReturnAnalysisFilename();
+	options.OutputFormat = ReturnOutputOption();
+	options.OverwriteMode = ReturnOverwriteState();
+	options.EnergyTolerance = EnergyTolerance;
+	return options;
 }
 
 
@@ -467,22 +515,36 @@ std::string CtabulateDlg::ReturnLibraryFilename()
 	int sel = LibraryFileListing.GetCurSel();
 	if (sel != LB_ERR)
 	{
-		libfile += GetListBoxSelection(sel);
+		libfile += GetListBoxSelection(LibraryFileListing, sel);
 		ret = CW2A(libfile);
 	}
 	return ret;
 }
 
 
-std::string CtabulateDlg::ReturnDataFilename(const int i) // <-- Add to header file
+std::string CtabulateDlg::ReturnDataFilename(const int i)
 {
 	std::string ret;
-	CString datfile{ default_genie_data_directory };
+	CString datfile{ DataDirectory };
 	int sel = DataFileListing.GetCurSel();
 	if (sel != LB_ERR)
 	{
-		datfile += GetListBoxSelection(datalistbox, sel);	// < --- Create a generic version of this to work w/ ReturnDataFilename and ReturnLibraryFilename
+		datfile += GetListBoxSelection(DataFileListing, sel);
 		ret = CW2A(datfile);
+	}
+	return ret;
+}
+
+
+std::string CtabulateDlg::ReturnAnalysisFilename()
+{
+	std::string ret;
+	CString asffile{ default_genie_control_directory };
+	int sel = AnalysisFileListing.GetCurSel();
+	if (sel != LB_ERR)
+	{
+		asffile += GetListBoxSelection(AnalysisFileListing, sel);
+		ret = CW2A(asffile);
 	}
 	return ret;
 }
@@ -498,21 +560,22 @@ bool CtabulateDlg::ReturnOverwriteState()
 OutputOption CtabulateDlg::ReturnOutputOption()
 {
 	OutputOption outoption;
-	switch (OutputOptionRB.GetCheck())
+	
+	switch (OutputOptionRB)
 	{
-	case IDC_RADIO_OPTA:
+	case 0:
 		outoption = OutputOption::a;
 		break;
 
-	case IDC_RADIO_OPTB:
+	case 1:
 		outoption = OutputOption::b;
 		break;
 
-	case IDC_RADIO_OPTC:
+	case 2:
 		outoption = OutputOption::c;
 		break;
 
-	case IDC_RADIO_OPTD:
+	case 3:
 		outoption = OutputOption::d;
 		break;
 
@@ -521,3 +584,4 @@ OutputOption CtabulateDlg::ReturnOutputOption()
 	}
 	return outoption;
 }
+

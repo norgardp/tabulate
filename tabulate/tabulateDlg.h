@@ -39,10 +39,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	CButton InsertFile;
-	CButton RemoveFile;
 	CButton SelectDataDir;
-	CButton OutputOptionRB;
 	CEdit PSEnergyTolerance;
 	CStatic OutputDescription;
 	CListBox DataFileListing;
@@ -52,7 +49,7 @@ public:
 	CStatic labelLibDir;
 	CButton OverwriteMode;
 
-	afx_msg void OnBnClickedRadioOptA();
+	afx_msg void OnBnClickedRadioOpta();
 	afx_msg void OnBnClickedRadioOptb();
 	afx_msg void OnBnClickedRadioOptc();
 	afx_msg void OnBnClickedRadioOptd();
@@ -60,7 +57,8 @@ public:
 	afx_msg void OnBnClickedBtnFileremove();
 	afx_msg void OnEnKillfocusEditEnergytol();
 	afx_msg void OnBnClickedBtnSelectDir();
-	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedLibrarySelect();
+	afx_msg void OnBnClickedBtnFileremoveall();
 	afx_msg void OnBnClickedOk();
 
 private:
@@ -69,13 +67,11 @@ private:
 	bool ReturnOverwriteState();
 
 	CString DataDirectory;
-	std::vector<CString> LibFiles;
-	int LibFileCount;
+	CString AnalysisDirectory;
 	std::vector<CString> DatFiles;
+	int LibFileCount;
 	int DatFileCount;
 	double EnergyTolerance;
-	//CNFobject dataset;
-	//NLBobject libdataset;
 
 private:
 	void VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, const CListBox* ptrListBox);
@@ -83,9 +79,19 @@ private:
 	void PrepareVectorForList(std::vector<CString>* listvector, int newcount);
 	void PopulateListBoxItems(CListBox* listbox, std::vector<CString>* data);
 	bool LocateVectorDuplicateEntry(const std::vector<CString>* localvector, const CString testvalue);
-	CString GetListBoxSelection(const int i);
+	CString GetListBoxSelection(const CListBox& listbox, const int i);
 	void SetListboxScrollbar(CListBox& theListbox);
 	OutputOption ReturnOutputOption();
 	std::string ReturnLibraryFilename();
+	std::string ReturnDataFilename(const int i);
+	std::string ReturnAnalysisFilename();
+	DataStructure::InitializationOptions ObtainInitializationOptions();
+	void ButtonHandler();
+
+public:
+	
+
+	CListBox AnalysisFileListing;
+	int OutputOptionRB{ 0 };
 	
 };

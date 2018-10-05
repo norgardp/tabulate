@@ -20,10 +20,12 @@ static constexpr TCHAR* default_genie_report_directory = _T("c:\\genie2k\\repfil
 // Default extension
 static constexpr TCHAR* default_library_extension = _T("*.nlb");
 static constexpr TCHAR* default_data_extension = _T("*.cnf");
+static constexpr TCHAR* default_analysis_extension = _T("*.asf");
 
 // Default filters
 static constexpr TCHAR* default_configuration_filter = _T("Configuration Files (*.cnf)|*.cnf|");
-static constexpr TCHAR* default_library_filter = _T("Nuclide LibraryFiles (*.cnf)|*.nlb|(*.elb)|*.elb|");
+static constexpr TCHAR* default_library_filter = _T("Nuclide Library Files (*.cnf)|*.nlb|(*.elb)|*.elb|");
+static constexpr TCHAR* default_analysis_filter = _T("Analysis Sequence Files (*.asf)|*.asf|");
 
 // Output option descriptions
 static constexpr TCHAR* output_option_a = _T("Sample ID and Percent Dead Time; for each energy line\n - Peak Area\n - Iterations\n - Peak FWHM (keV)\n - Peak Energy (keV)");
