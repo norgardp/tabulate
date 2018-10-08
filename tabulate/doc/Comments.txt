@@ -1,0 +1,9 @@
+PAN, 2018-Oct-08
+
+Problem:
+Program crashes with consistency whenever the program attempts to open the NLB file during an analysis of the CNF file.
+
+Diagnosis:
+In the way that I have instantiated the DataAccess module, I believe I can only open on CAM object at a time. I think for now I will simply import library data into the CNFobject so that I am not having to rewrite the CAMobject to more smartly handle the COM interface pointer. At the moment, this will be a limitation that I can probably live with.
+
+In a future solution, I may create an instantiation routine that is separate from the CAMobject, along with a flag to indicate the status of the DataAccess and SequenceAnalyzer interface pointers. 

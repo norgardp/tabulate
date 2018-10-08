@@ -506,6 +506,7 @@ DataStructure::InitializationOptions CtabulateDlg::ObtainInitializationOptions()
 	options.OutputFormat = ReturnOutputOption();
 	options.OverwriteMode = ReturnOverwriteState();
 	options.EnergyTolerance = EnergyTolerance;
+	options.NuclidesInLibrary = libraryData;
 	return options;
 }
 

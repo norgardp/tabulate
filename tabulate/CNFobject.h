@@ -34,16 +34,19 @@ private:
 	void SetOverwriteMode(const bool save_mode);
 	void SetOutputOption(const OutputOption output_option);
 	void SetEnergyTolerance(const double tolerance);
+	void SetLibraryDimensions(const std::vector<LibraryStruct>& library_struc);
 	void UnpackInitilizerStruct(const DataStructure::InitializationOptions& init_options);
 	void OpenDatafile(const std::string& datafile);
 	void PerformAnalysis();
-	void GetLibraryDimensions();
 	void PopulateDataStructure();
 	void ResizeDataStructure();
 	void PopulateHeaderStructure();
 	void PopulateNuclideData();
 	void PushEnergyToleranceToFile();
 	void PushNIDLibraryToFile();
+	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
+	void IDInterestingPeaks();
+	void AppendToOutputString(const USHORT nuclide_no);
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
@@ -57,5 +60,6 @@ private:
 	std::vector<LibraryStruct> psLibrary;
 	SHORT start_step{ 0 };
 	LibraryDimension libDim;
+	std::string output_string;
 };
 

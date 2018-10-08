@@ -44,6 +44,8 @@ public:
 	void SetNumericParam(ULONG param, USHORT record, const T& type);
 	void SetStringParam(ULONG param, USHORT record, std::string& data, USHORT buff_len);
 
+	SHORT ReturnPeakSearchIndex(const OjEnergy_T& peak_to_find);
+
 private:
 	void CreateDataAccessInterface();
 	void CreateDataSourceContext();

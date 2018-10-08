@@ -69,6 +69,12 @@ void CNFobject::SetOverwriteMode(const bool mode)
 }
 
 
+void CNFobject::SetLibraryDimensions(const std::vector<LibraryStruct>& library_struc)
+{
+	psLibrary = library_struc;
+}
+
+
 void CNFobject::UnpackInitilizerStruct(const DataStructure::InitializationOptions& init)
 {
 	SetLibraryFilename(init.Library);
@@ -76,6 +82,7 @@ void CNFobject::UnpackInitilizerStruct(const DataStructure::InitializationOption
 	SetOverwriteMode(init.OverwriteMode);
 	SetOutputOption(init.OutputFormat);
 	SetEnergyTolerance(init.EnergyTolerance);
+	SetLibraryDimensions(init.NuclidesInLibrary);
 }
 
 void CNFobject::CreateInstance(const std::string& datafile)
@@ -108,7 +115,7 @@ void CNFobject::OpenDatafile(const std::string& datafile)
 		}
 	}
 	OpenFile(datafile, open_mode, close_mode);
-	PushEnergyToleranceToFile();
+	//PushEnergyToleranceToFile();
 	//PushNIDLibraryToFile();
 }
 
@@ -129,19 +136,13 @@ std::string CNFobject::ReturnFormattedLine()
 }
 
 
-void CNFobject::GetLibraryDimensions()
-{
-	NLBobject nlb(library_name);
-	libDim = nlb.ReturnLibraryDimension();
-}
-
-
 void CNFobject::PopulateDataStructure()
 {
-	//GetLibraryDimensions();
 	ResizeDataStructure();
 	PopulateHeaderStructure();
 	PopulateNuclideData();
+	output_string.clear();
+	IDInterestingPeaks();
 }
 
 
@@ -157,14 +158,36 @@ void CNFobject::PopulateHeaderStructure()
 	psData.AcquisitionStart = ReturnTimeSParam(CAM_X_ASTIME, 0);
 	psData.LiveTime = ReturnTimeNParam(CAM_X_ELIVE, 0);
 	psData.RealTime = ReturnTimeNParam(CAM_X_EREAL, 0);
-	psData.CorrectedLiveTime = ReturnTimeNParam(CAM_X_PPELIVE, 0);
 	psData.DeadTimePct = 100 * (psData.RealTime - psData.LiveTime) / psData.RealTime;
 }
 
 
 void CNFobject::PopulateNuclideData()
 {
-	//==============================================================  NOT DONE HERE EITHER
+	USHORT record;
+	USHORT line_count = ReturnRecordCount(CAM_CLS_PEAK);
+	for (USHORT i{ 1 }; i < line_count; i++)
+	{
+		record = i + 1;
+		psData.Nuclides.push_back(ReturnNuclideInformation(record));
+	}
+}
+
+
+DataStructure::NuclideStructure::NuclideStruct CNFobject::ReturnNuclideInformation(const USHORT i)
+{
+	LONG Ldummy;
+	FLOAT Fdummy;
+	DataStructure::NuclideStructure::NuclideStruct data;
+	
+	data.Iterations.push_back(ReturnNumericParam(CAM_L_PSITER, i, Ldummy));
+	data.Area.push_back(ReturnNumericParam(CAM_F_PSAREA, i, Fdummy));
+	data.Energy.push_back(ReturnNumericParam(CAM_F_PSENERGY, i, Fdummy));
+	data.FWHM.push_back(ReturnNumericParam(CAM_F_PSFWHM, i, Fdummy));
+	data.Rate.push_back(ReturnNumericParam(CAM_F_PSCTSS, i, Fdummy));
+	data.Error.push_back(ReturnNumericParam(CAM_F_PSCERR, i, Fdummy));
+	
+	return data;
 }
 
 void CNFobject::PushEnergyToleranceToFile()
@@ -178,4 +201,31 @@ void CNFobject::PushNIDLibraryToFile()
 {
 	USHORT rec{ 1 };
 
+}
+
+void CNFobject::IDInterestingPeaks()
+{
+	LONG nuclide_lines;
+	SHORT match;
+	USHORT nuclide_match;
+	OjEnergy_T lib_peak;
+
+	lib_peak.rToler = energy_tolerance;
+	for (LONG i{ 0 }; i < psLibrary.size(); i++)
+	{
+		nuclide_lines = psLibrary.at(i).PeakEnergy.size();
+		for (LONG j{ 0 }; j < nuclide_lines; j++)
+		{
+			lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
+			match = ReturnPeakSearchIndex(lib_peak);
+			if (match >= 0)
+				AppendToOutputString((USHORT)match);
+		}
+	}
+}
+
+
+void CNFobject::AppendToOutputString(const USHORT match)
+{
+	// nothing here yet
 }
