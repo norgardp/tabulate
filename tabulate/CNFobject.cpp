@@ -209,7 +209,8 @@ void CNFobject::IDInterestingPeaks()
 	SHORT match;
 	USHORT nuclide_match;
 	OjEnergy_T lib_peak;
-
+	// ====================================================================> STOPPED HERE 8 Oct
+	// ====================================================================> Next step, verify loop works the way I need it to
 	lib_peak.rToler = energy_tolerance;
 	for (LONG i{ 0 }; i < psLibrary.size(); i++)
 	{
