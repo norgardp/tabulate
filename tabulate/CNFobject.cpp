@@ -219,8 +219,7 @@ void CNFobject::IDInterestingPeaks()
 		{
 			lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
 			match = ReturnPeakSearchIndex(lib_peak);
-			if (match >= 0)
-				AppendToOutputString((USHORT)match);
+			psLibrary.at(i).PeakSearchResult.push_back(match);
 		}
 	}
 }
@@ -228,5 +227,12 @@ void CNFobject::IDInterestingPeaks()
 
 void CNFobject::AppendToOutputString(const USHORT match)
 {
-	// nothing here yet
+	if (output_string.empty())
+	{
+		// Fill common information
+	}
+	else
+	{
+
+	}
 }

@@ -490,6 +490,7 @@ void CtabulateDlg::OnBnClickedOk()
 	options = ObtainInitializationOptions();
 
 	int data_count{ LibraryContentListing.GetCount() };
+	--data_count;
 	for (int i{ 0 }; i < data_count; i++)
 	{
 		CNFobject data(options);
