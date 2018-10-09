@@ -53,6 +53,9 @@ static constexpr size_t fwf_peak_fwhm = 6;
 static constexpr size_t fwf_iterations = 6;
 
 // Fixed precision for doubles
+static constexpr size_t fwf_precision_area = 1;
+static constexpr size_t fwf_precision_npa = 2; 
 static constexpr size_t fwf_precision_time = 2;
 static constexpr size_t fwf_precision_percent = 3;
 static constexpr size_t fwf_precision_energy = 2;
+static constexpr size_t fwf_precision_iterations = 1;

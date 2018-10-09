@@ -158,10 +158,10 @@ void CNFobject::PopulateHeaderStructure()
 void CNFobject::PopulateNuclideData()
 {
 	USHORT record;
-	USHORT line_count = ReturnRecordCount(CAM_CLS_PEAK);
-	for (USHORT i{ 1 }; i < line_count; i++)
+	LONG line_count = ReturnRecordCount(CAM_CLS_PEAK);
+	for (LONG i{ 1 }; i < line_count; i++)
 	{
-		record = i + 1;
+		record = static_cast<USHORT>(i) + 1;
 		psData.Nuclides.push_back(ReturnNuclideInformation(record));
 	}
 }
@@ -201,20 +201,20 @@ void CNFobject::IDInterestingPeaks()
 // energy and user supplied search tolerance. If a peak is found in data, then
 // emplace the peak index into the psLibrary.PeakSearchResult vector.
 {
-	LONG nuclide_lines;
 	SHORT match;
-	USHORT nuclide_match;
 	OjEnergy_T lib_peak;
 
-	lib_peak.rToler = energy_tolerance;
-	for (LONG i{ 0 }; i < psLibrary.size(); i++)
+	lib_peak.rToler = static_cast<float>(energy_tolerance);
+	size_t max_nuclides{ psLibrary.size() };
+	size_t max_lines;
+	for (size_t i{ 0 }; i < max_nuclides; i++)
 	{
-		nuclide_lines = psLibrary.at(i).PeakEnergy.size();
-		psLibrary.at(i).PeakSearchResult.resize(nuclide_lines);
-		for (LONG j{ 0 }; j < nuclide_lines; j++)
+		max_lines = psLibrary.at(i).PeakEnergy.size();
+		psLibrary.at(i).PeakSearchResult.resize(max_lines);
+		for (size_t j{ 0 }; j < max_lines; j++)
 		{
 			lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
-			match = ReturnPeakSearchIndex(lib_peak);
+			match = ReturnPeakSearchIndex(lib_peak) - 1;
 			psLibrary.at(i).PeakSearchResult.at(j) = match;
 		}
 	}
@@ -228,69 +228,53 @@ std::string CNFobject::ReturnFormattedLine()
 }
 
 
+// ============================================================================================
+
 void CNFobject::WriteCommonData()
 {
+	std::stringstream ss;
+
+	// TYPE INDEPENDENT COMMON FILE DATA
+
+	// Filename
+	SetStreamParameters(ss, fwf_filename);
+	ss << std::string(ReturnSimpleFilename()) << ", ";
+	// Acquistion start
+	SetStreamParameters(ss, fwf_acquisition_start);
+	ss << std::string(psData.AcquisitionStart) << ", ";
+
+	WriteCommonDataType(ss);
+
+}
+
+
+void CNFobject::WriteCommonDataType(std::stringstream& ss)
+{
+
 	switch (output_option)
 	{
 	case OutputOption::a:
 	case OutputOption::c:
-		// Common data: Filename, Acquisition start (DD:MMM:YYYY HH:MM:SS), Real Time, Live Time
-		WriteCommonData_Type1();
+		// Real time
+		SetStreamParameters(ss, fwf_realtime, fwf_precision_time);
+		ss << std::to_string(psData.RealTime) << ", ";
+		// Live time
+		SetStreamParameters(ss, fwf_livetime, fwf_precision_time);
+		ss << std::to_string(psData.LiveTime) << ", ";
 		break;
 
 	case OutputOption::b:
 	case OutputOption::d:
-		// Common data: Filename, Acquisition start (DD:MMM:YYYY HH:MM:SS), Sample ID, % Dead Time
-		WriteCommonData_Type2();
+		// Sample ID
+		SetStreamParameters(ss, fwf_samplie_id);
+		ss << std::string(psData.SampleID) << ", ";
+		// Deadtime %
+		SetStreamParameters(ss, fwf_deadtime_pct, fwf_precision_time);
+		ss << std::to_string(psData.DeadTimePct) << ", ";
 		break;
 	}
 }
 
-
-void CNFobject::AppendToOutputString(std::string the_string, const size_t field_width, const bool add_comma)
-{
-	output_string += ReturnFixedWidthString(the_string, field_width);
-	if (add_comma)
-		AddComma();
-}
-
-
-void CNFobject::WriteCommonData_Type1()
-{
-	std::string local = ReturnSimpleFilename();
-	AppendToOutputString(local, fwf_filename, true);
-
-	local.clear();
-	local = psData.AcquisitionStart;
-	AppendToOutputString(local, fwf_acquisition_start, true);
-
-	local.clear();
-	local = ReturnFixedFieldWidthString(psData.RealTime, fwf_precision_time);
-	AppendToOutputString(local, fwf_realtime, true);
-	
-	local.clear();
-	local = ReturnFixedFieldWidthString(psData.LiveTime, fwf_precision_time);
-	AppendToOutputString(local, fwf_livetime, true);
-}
-
-
-void CNFobject::WriteCommonData_Type2()
-{
-	std::string local = ReturnSimpleFilename();
-	AppendToOutputString(local, fwf_filename, true);
-
-	local.clear();
-	local = psData.AcquisitionStart;
-	AppendToOutputString(local, fwf_acquisition_start, true);
-
-	local.clear();
-	local = psData.SampleID;
-	AppendToOutputString(local, fwf_samplie_id, true);
-
-	local.clear();
-	local = ReturnFixedFieldWidthString(psData.DeadTimePct, fwf_precision_percent);
-	AppendToOutputString(local, fwf_deadtime_pct, true);
-}
 
 std::string CNFobject::ReturnSimpleFilename()
 {
@@ -310,35 +294,67 @@ std::string CNFobject::ReturnSimpleFilename()
 }
 
 
-std::string CNFobject::ReturnFixedWidthString(std::string& the_string, const size_t field_width)
-{
-	std::stringstream ss;
-	ss << std::setw(field_width) << the_string;
-	return ss.str();
-}
-
-
-void CNFobject::AddComma()
-{
-	output_string += std::string(", ");
-}
-
-
-//std::string CNFobject::ReturnFixedFieldWidthString(FLOAT& the_number, const size_t precision)
-//{
-//	std::stringstream ss;
-//	ss << std::fixed << std::setprecision(precision) << the_number;
-//	return ss.str();
-//}
-
-
 void CNFobject::WriteNuclideData()
 {
+	bool last_file, last_line;
+	bool last_element{ false };
+	size_t max_file{ psLibrary.size() };
+	size_t max_line;
+	std::stringstream ss;
+	USHORT use_nuclide;
+
+	for (size_t i{ 0 }; i < max_file; i++)
+	{
+		last_file = ((i + 1) == max_file) ? true : false;
+		max_line = psLibrary.at(i).PeakEnergy.size();
+		for (size_t j{ 0 }; j < max_line; j++)
+		{
+			last_line = ((j + 1) == max_line) ? true : false;
+			if (last_file && last_line)
+				last_element = true;
+			use_nuclide = psLibrary.at(i).PeakSearchResult.at(j);
+			WriteNuclideDataType(ss, i, static_cast<size_t>(use_nuclide), last_element);
+		}
+
+	}
+	output_string = ss.str();
+}
+
+
+void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_width)
+{
+	ss << std::setw(field_width);
+}
+
+
+void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision)
+{
+	ss << std::setw(field_width) << std::setprecision(precision);
+}
+
+
+void CNFobject::WriteNuclideDataType(std::stringstream& ss, 
+	const size_t file, const size_t line, const bool final_element)
+{
+	std::string last_element(", ");
+	if (final_element)
+		last_element = "";
+
 	switch (output_option)
 	{
 	case OutputOption::a:
-		// Nuclide data: peak area, iterations, FWHM, peak energy
-		WriteNuclideData_Type1();
+		// Peak area
+		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
+		ss << std::to_string(psData.Nuclides.at(line).Area.at(0)) << ", ";
+		// Iterations to find peak
+		SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
+		ss << std::to_string(psData.Nuclides.at(line).Iterations.at(0)) << ", ";
+		// Peak fwhm
+		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
+		ss << std::to_string(psData.Nuclides.at(line).FWHM.at(0)) << ", ";
+		// Peak energy
+		SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
+		ss << std::to_string(psData.Nuclides.at(line).FWHM.at(0)) << last_element;
 		break;
 
 	case OutputOption::b:
@@ -353,93 +369,8 @@ void CNFobject::WriteNuclideData()
 
 	case OutputOption::d:
 		// Nuclide data: peak area, FWHM, error (%)
-		
+
 		break;
 	}
 }
 
-
-void CNFobject::WriteNuclideData_Type1()
-{
-	std::string local;
-	USHORT index_value;
-	bool last_nuclide, last_line;
-	bool do_comma{ true };
-
-	for (LONG i{ 0 }; i < psLibrary.size(); i++)
-	{
-		if ((i + 1) == psLibrary.size())
-			last_nuclide = true;
-
-		for (LONG j{ 0 }; j < psLibrary.at(i).PeakEnergy.size(); j++)
-		{
-			if ((j + 1) == psLibrary.at(i).PeakEnergy.size())
-			{
-				last_line = true;
-				if (last_nuclide && last_line)
-					do_comma = false;
-			}
-
-			index_value = psLibrary.at(i).PeakSearchResult.at(j);
-			
-			local = ReturnPeakArea(i, j);
-			AppendToOutputString(local, fwf_peak_area, true);
-
-			local.clear();
-			local = ReturnIterations(i, j);
-			AppendToOutputString(local, fwf_iterations, true);
-
-			
-			local.clear();
-			local = ReturnPeakFWHM(i, j);
-			AppendToOutputString(local, fwf_peak_fwhm, true);
-
-			local.clear();
-			local = ReturnPeakEnergy(i, j);
-			AppendToOutputString(local, fwf_peak_energy, do_comma);
-		}
-	}
-}
-
-
-std::string CNFobject::ReturnPeakArea(const USHORT nuclide, const USHORT line)
-{
-	FLOAT x = psData.Nuclides.at(nuclide).Area.at(line);
-	LONG y = ConvertFLOATtoLONG(x);
-	return std::string(ReturnFixedIntegerString(y));
-}
-
-
-LONG CNFobject::ConvertFLOATtoLONG(const FLOAT& the_float)
-{
-	return static_cast<LONG>(the_float);
-}
-
-
-std::string CNFobject::ReturnFixedIntegerString(LONG& the_number)
-{
-	std::stringstream ss;
-	ss << the_number;
-	return ss.str();
-}
-
-
-std::string CNFobject::ReturnIterations(const USHORT nuclide, const USHORT line)
-{
-	LONG ret = psData.Nuclides.at(nuclide).Iterations.at(line);
-	return std::string(ReturnFixedIntegerString(ret));
-}
-
-
-std::string CNFobject::ReturnPeakFWHM(const USHORT nuclide, const USHORT line)
-{
-	FLOAT ret = psData.Nuclides.at(nuclide).FWHM.at(line);
-	return std::string(ReturnFixedFieldWidthString(ret, fwf_precision_energy));
-}
-
-
-std::string CNFobject::ReturnPeakEnergy(const USHORT nuclide, const USHORT line)
-{
-	FLOAT ret = psData.Nuclides.at(nuclide).Energy.at(line);
-	return std::string(ReturnFixedFieldWidthString(ret, fwf_precision_energy));
-}

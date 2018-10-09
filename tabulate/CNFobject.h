@@ -48,25 +48,13 @@ private:
 	void PushNIDLibraryToFile();
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
-	void AppendToOutputString(const USHORT nuclide_no);
 	void WriteCommonData();
-	void WriteCommonData_Type1();
-	void WriteCommonData_Type2();
+	void WriteCommonDataType(std::stringstream& ss);
 	std::string ReturnSimpleFilename();
-	std::string ReturnFixedWidthString(std::string& the_string, const size_t field_width);
-	void AddComma();
 	void WriteNuclideData();
-	void WriteNuclideData_Type1();
-	void AppendToOutputString(std::string the_string, const size_t field_width, const bool add_comma);
-	std::string ReturnPeakArea(const USHORT nuclide, const USHORT line);
-	std::string ReturnIterations(const USHORT nuclide, const USHORT line);
-	std::string ReturnPeakFWHM(const USHORT nuclide, const USHORT line);
-	std::string ReturnPeakEnergy(const USHORT nuclide, const USHORT line);
-	std::string ReturnFixedIntegerString(LONG& the_number);
-	LONG ConvertFLOATtoLONG(const FLOAT& the_float);
-
-	template<typename T>
-	std::string ReturnFixedFieldWidthString(T& the_number, const size_t precision);
+	void SetStreamParameters(std::stringstream& ss, const size_t field_width);
+	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
+	void WriteNuclideDataType(std::stringstream& ss, const size_t file, const size_t line, const bool final_element);
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
@@ -82,11 +70,3 @@ private:
 	LibraryDimension libDim;
 	std::string output_string;
 };
-
-template<typename T>
-std::string CNFobject::ReturnFixedFieldWidthString(T& the_number, const size_t precision)
-{
-	std::stringstream ss;
-	ss << std::fixed << std::setprecision(precision) << the_number;
-	return ss.str();
-}

@@ -488,6 +488,10 @@ void CtabulateDlg::OnBnClickedOk()
 {
 	DataStructure::InitializationOptions options;
 	options = ObtainInitializationOptions();
+	
+	// temporary output; I will createa  file stream and direct the ReturnFormattedLine() function
+	// to the output stream
+	std::string out;
 
 	int data_count{ LibraryContentListing.GetCount() };
 	--data_count;
@@ -495,7 +499,7 @@ void CtabulateDlg::OnBnClickedOk()
 	{
 		CNFobject data(options);
 		data.CreateInstance(ReturnDataFilename(i));
-		data.
+		data.ReturnFormattedLine();
 	}
 }
 

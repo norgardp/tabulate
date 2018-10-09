@@ -16,7 +16,6 @@ namespace DataStructure
 	{
 		struct NuclideStruct
 		{
-			std::string NuclideName;
 			std::vector<FLOAT> Energy;		// CAM_F_PSENERGY
 			std::vector<FLOAT> Area;		// CAM_F_PSAREA
 			std::vector<FLOAT> FWHM;		// CAM_F_PSFWHM

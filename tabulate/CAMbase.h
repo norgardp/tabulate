@@ -26,6 +26,8 @@ class CAMbase
 public:
 	CAMbase();
 	virtual ~CAMbase();
+	
+protected:
 	bool IsOpen();
 	void OpenFile(const std::string& name,
 		const CanberraDataAccessLib::OpenMode om,
