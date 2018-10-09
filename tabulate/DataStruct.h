@@ -16,12 +16,12 @@ namespace DataStructure
 	{
 		struct NuclideStruct
 		{
-			std::vector<FLOAT> Energy;		// CAM_F_PSENERGY
-			std::vector<FLOAT> Area;		// CAM_F_PSAREA
-			std::vector<FLOAT> FWHM;		// CAM_F_PSFWHM
-			std::vector<LONG> Iterations;	// CAM_L_PSITER
-			std::vector<FLOAT> Rate;		// CAM_F_PSCTSS
-			std::vector<FLOAT> Error;		// CAM_F_PSCERR
+			FLOAT Energy;		// CAM_F_PSENERGY
+			FLOAT Area;		// CAM_F_PSAREA
+			FLOAT FWHM;		// CAM_F_PSFWHM
+			LONG Iterations;	// CAM_L_PSITER
+			FLOAT Rate;		// CAM_F_PSCTSS
+			FLOAT Error;		// CAM_F_PSCERR
 		};
 	}
 

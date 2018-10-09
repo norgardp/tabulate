@@ -173,12 +173,12 @@ DataStructure::NuclideStructure::NuclideStruct CNFobject::ReturnNuclideInformati
 	FLOAT Fdummy;
 	DataStructure::NuclideStructure::NuclideStruct data;
 	
-	data.Iterations.push_back(ReturnNumericParam(CAM_L_PSITER, i, Ldummy));
-	data.Area.push_back(ReturnNumericParam(CAM_F_PSAREA, i, Fdummy));
-	data.Energy.push_back(ReturnNumericParam(CAM_F_PSENERGY, i, Fdummy));
-	data.FWHM.push_back(ReturnNumericParam(CAM_F_PSFWHM, i, Fdummy));
-	data.Rate.push_back(ReturnNumericParam(CAM_F_PSCTSS, i, Fdummy));
-	data.Error.push_back(ReturnNumericParam(CAM_F_PSCERR, i, Fdummy));
+	data.Iterations = ReturnNumericParam(CAM_L_PSITER, i, Ldummy);
+	data.Area = ReturnNumericParam(CAM_F_PSAREA, i, Fdummy);
+	data.Energy = ReturnNumericParam(CAM_F_PSENERGY, i, Fdummy);
+	data.FWHM = ReturnNumericParam(CAM_F_PSFWHM, i, Fdummy);
+	data.Rate = ReturnNumericParam(CAM_F_PSCTSS, i, Fdummy);
+	data.Error = ReturnNumericParam(CAM_F_PSCERR, i, Fdummy);
 	
 	return data;
 }
@@ -345,16 +345,16 @@ void CNFobject::WriteNuclideDataType(std::stringstream& ss,
 	case OutputOption::a:
 		// Peak area
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		ss << std::to_string(psData.Nuclides.at(line).Area.at(0)) << ", ";
+		ss << std::to_string(psData.Nuclides.at(line).Area) << ", ";
 		// Iterations to find peak
 		SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
-		ss << std::to_string(psData.Nuclides.at(line).Iterations.at(0)) << ", ";
+		ss << std::to_string(psData.Nuclides.at(line).Iterations) << ", ";
 		// Peak fwhm
 		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		ss << std::to_string(psData.Nuclides.at(line).FWHM.at(0)) << ", ";
+		ss << std::to_string(psData.Nuclides.at(line).FWHM) << ", ";
 		// Peak energy
 		SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
-		ss << std::to_string(psData.Nuclides.at(line).FWHM.at(0)) << last_element;
+		ss << std::to_string(psData.Nuclides.at(line).Energy) << last_element;
 		break;
 
 	case OutputOption::b:
