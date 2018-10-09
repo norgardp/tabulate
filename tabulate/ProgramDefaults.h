@@ -40,7 +40,7 @@ static constexpr double default_energy_tolerance = 2.50;
 // Fixed field widths
 // Output file fixed width field lengths: common data fields
 static constexpr size_t fwf_filename = 30;
-static constexpr size_t fwf_acquisition_start = 20;
+static constexpr size_t fwf_acquisition_start = 22;
 static constexpr size_t fwf_realtime = 8;
 static constexpr size_t fwf_livetime = 8;
 static constexpr size_t fwf_samplie_id = 16;

@@ -499,7 +499,7 @@ void CtabulateDlg::OnBnClickedOk()
 	{
 		CNFobject data(options);
 		data.CreateInstance(ReturnDataFilename(i));
-		data.ReturnFormattedLine();
+		out = data.ReturnFormattedLine();
 	}
 }
 

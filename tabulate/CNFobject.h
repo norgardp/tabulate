@@ -49,12 +49,12 @@ private:
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
 	void WriteCommonData();
-	void WriteCommonDataType(std::stringstream& ss);
+	void WriteCommonDataType();
 	std::string ReturnSimpleFilename();
 	void WriteNuclideData();
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
-	void WriteNuclideDataType(std::stringstream& ss, const size_t file, const size_t line, const bool final_element);
+	void WriteNuclideDataType(const size_t line, const bool final_element);
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;

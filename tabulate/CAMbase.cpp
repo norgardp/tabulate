@@ -229,7 +229,7 @@ SHORT CAMbase::ReturnPeakSearchIndex(const OjEnergy_T& find_me)
 		else
 			ret = -1;
 	}
-	return ret;
+	return (ret - 1);
 }
 
 

@@ -214,7 +214,7 @@ void CNFobject::IDInterestingPeaks()
 		for (size_t j{ 0 }; j < max_lines; j++)
 		{
 			lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
-			match = ReturnPeakSearchIndex(lib_peak) - 1;
+			match = ReturnPeakSearchIndex(lib_peak);
 			psLibrary.at(i).PeakSearchResult.at(j) = match;
 		}
 	}
@@ -223,7 +223,9 @@ void CNFobject::IDInterestingPeaks()
 std::string CNFobject::ReturnFormattedLine()
 {  
 	WriteCommonData();
+	WriteCommonDataType();
 	WriteNuclideData();
+
 	return output_string;
 }
 
@@ -241,15 +243,19 @@ void CNFobject::WriteCommonData()
 	ss << std::string(ReturnSimpleFilename()) << ", ";
 	// Acquistion start
 	SetStreamParameters(ss, fwf_acquisition_start);
-	ss << std::string(psData.AcquisitionStart) << ", ";
+	ss << std::string(psData.AcquisitionStart);
+	SetStreamParameters(ss, 1);
+	ss << ", ";
+	ss.flush();
 
-	WriteCommonDataType(ss);
-
+	output_string = std::string(ss.str());
+	
 }
 
 
-void CNFobject::WriteCommonDataType(std::stringstream& ss)
+void CNFobject::WriteCommonDataType()
 {
+	std::stringstream ss;
 
 	switch (output_option)
 	{
@@ -273,6 +279,8 @@ void CNFobject::WriteCommonDataType(std::stringstream& ss)
 		ss << std::to_string(psData.DeadTimePct) << ", ";
 		break;
 	}
+
+	output_string += std::string(ss.str());
 }
 
 
@@ -312,12 +320,12 @@ void CNFobject::WriteNuclideData()
 			last_line = ((j + 1) == max_line) ? true : false;
 			if (last_file && last_line)
 				last_element = true;
-			use_nuclide = psLibrary.at(i).PeakSearchResult.at(j);
-			WriteNuclideDataType(ss, i, static_cast<size_t>(use_nuclide), last_element);
+			use_nuclide = psLibrary.at(i).PeakSearchResult.at(j) - 1;
+			WriteNuclideDataType(static_cast<size_t>(use_nuclide), last_element);
 		}
 
 	}
-	output_string = ss.str();
+	output_string += std::string(ss.str());
 }
 
 
@@ -333,12 +341,12 @@ void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_wi
 }
 
 
-void CNFobject::WriteNuclideDataType(std::stringstream& ss, 
-	const size_t file, const size_t line, const bool final_element)
+void CNFobject::WriteNuclideDataType(const size_t line, const bool final_element)
 {
+	std::stringstream ss;
 	std::string last_element(", ");
 	if (final_element)
-		last_element = "";
+		last_element = "\n";
 
 	switch (output_option)
 	{
@@ -372,5 +380,7 @@ void CNFobject::WriteNuclideDataType(std::stringstream& ss,
 
 		break;
 	}
+
+	output_string += ss.str();
 }
 
