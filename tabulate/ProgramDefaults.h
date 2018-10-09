@@ -35,3 +35,24 @@ static constexpr TCHAR* output_option_d = _T("Real Time and Corrected Live Time;
 
 // Energy tolerance used for library directed peak search
 static constexpr double default_energy_tolerance = 2.50;
+
+
+// Fixed field widths
+// Output file fixed width field lengths: common data fields
+static constexpr size_t fwf_filename = 30;
+static constexpr size_t fwf_acquisition_start = 20;
+static constexpr size_t fwf_realtime = 8;
+static constexpr size_t fwf_livetime = 8;
+static constexpr size_t fwf_samplie_id = 16;
+static constexpr size_t fwf_deadtime_pct = 6;
+
+// Output file fixed width field lengths: nuclide specific fields
+static constexpr size_t fwf_peak_area = 10;
+static constexpr size_t fwf_peak_energy = 10;
+static constexpr size_t fwf_peak_fwhm = 6;
+static constexpr size_t fwf_iterations = 6;
+
+// Fixed precision for doubles
+static constexpr size_t fwf_precision_time = 2;
+static constexpr size_t fwf_precision_percent = 3;
+static constexpr size_t fwf_precision_energy = 2;

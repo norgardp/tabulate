@@ -231,3 +231,10 @@ SHORT CAMbase::ReturnPeakSearchIndex(const OjEnergy_T& find_me)
 	}
 	return ret;
 }
+
+
+std::string CAMbase::ReturnFilename()
+{
+	std::string out{ file_name };
+	return out;
+}

@@ -129,13 +129,6 @@ void CNFobject::PerformAnalysis()
 }
 
 
-std::string CNFobject::ReturnFormattedLine()
-{
-	// NOT DONE HERE ================================================================== NOT DONE HERE
-	return std::string();
-}
-
-
 void CNFobject::PopulateDataStructure()
 {
 	ResizeDataStructure();
@@ -227,15 +220,226 @@ void CNFobject::IDInterestingPeaks()
 	}
 }
 
+std::string CNFobject::ReturnFormattedLine()
+{  
+	WriteCommonData();
+	WriteNuclideData();
+	return output_string;
+}
 
-void CNFobject::AppendToOutputString(const USHORT match)
+
+void CNFobject::WriteCommonData()
 {
-	if (output_string.empty())
+	switch (output_option)
 	{
-		// Fill common information
-	}
-	else
-	{
+	case OutputOption::a:
+	case OutputOption::c:
+		// Common data: Filename, Acquisition start (DD:MMM:YYYY HH:MM:SS), Real Time, Live Time
+		WriteCommonData_Type1();
+		break;
 
+	case OutputOption::b:
+	case OutputOption::d:
+		// Common data: Filename, Acquisition start (DD:MMM:YYYY HH:MM:SS), Sample ID, % Dead Time
+		WriteCommonData_Type2();
+		break;
 	}
+}
+
+
+void CNFobject::AppendToOutputString(std::string the_string, const size_t field_width, const bool add_comma)
+{
+	output_string += ReturnFixedWidthString(the_string, field_width);
+	if (add_comma)
+		AddComma();
+}
+
+
+void CNFobject::WriteCommonData_Type1()
+{
+	std::string local = ReturnSimpleFilename();
+	AppendToOutputString(local, fwf_filename, true);
+
+	local.clear();
+	local = psData.AcquisitionStart;
+	AppendToOutputString(local, fwf_acquisition_start, true);
+
+	local.clear();
+	local = ReturnFixedFieldWidthString(psData.RealTime, fwf_precision_time);
+	AppendToOutputString(local, fwf_realtime, true);
+	
+	local.clear();
+	local = ReturnFixedFieldWidthString(psData.LiveTime, fwf_precision_time);
+	AppendToOutputString(local, fwf_livetime, true);
+}
+
+
+void CNFobject::WriteCommonData_Type2()
+{
+	std::string local = ReturnSimpleFilename();
+	AppendToOutputString(local, fwf_filename, true);
+
+	local.clear();
+	local = psData.AcquisitionStart;
+	AppendToOutputString(local, fwf_acquisition_start, true);
+
+	local.clear();
+	local = psData.SampleID;
+	AppendToOutputString(local, fwf_samplie_id, true);
+
+	local.clear();
+	local = ReturnFixedFieldWidthString(psData.DeadTimePct, fwf_precision_percent);
+	AppendToOutputString(local, fwf_deadtime_pct, true);
+}
+
+std::string CNFobject::ReturnSimpleFilename()
+{
+	std::string filename = ReturnFilename();
+
+	// Remove pathname if present
+	const size_t last_slash_index = filename.find_last_of("\\/");
+	if (std::string::npos != last_slash_index)
+		filename.erase(0, last_slash_index + 1);
+
+	// Remove file extension if present
+	const size_t period_index = filename.rfind(".");
+	if (std::string::npos != period_index)
+		filename.erase(period_index);
+
+	return filename;
+}
+
+
+std::string CNFobject::ReturnFixedWidthString(std::string& the_string, const size_t field_width)
+{
+	std::stringstream ss;
+	ss << std::setw(field_width) << the_string;
+	return ss.str();
+}
+
+
+void CNFobject::AddComma()
+{
+	output_string += std::string(", ");
+}
+
+
+//std::string CNFobject::ReturnFixedFieldWidthString(FLOAT& the_number, const size_t precision)
+//{
+//	std::stringstream ss;
+//	ss << std::fixed << std::setprecision(precision) << the_number;
+//	return ss.str();
+//}
+
+
+void CNFobject::WriteNuclideData()
+{
+	switch (output_option)
+	{
+	case OutputOption::a:
+		// Nuclide data: peak area, iterations, FWHM, peak energy
+		WriteNuclideData_Type1();
+		break;
+
+	case OutputOption::b:
+		// Nulcide data: peak area, FWHM
+
+		break;
+
+	case OutputOption::c:
+		// Nuclide data: peak area, error (%), FWHM, peak energy
+
+		break;
+
+	case OutputOption::d:
+		// Nuclide data: peak area, FWHM, error (%)
+		
+		break;
+	}
+}
+
+
+void CNFobject::WriteNuclideData_Type1()
+{
+	std::string local;
+	USHORT index_value;
+	bool last_nuclide, last_line;
+	bool do_comma{ true };
+
+	for (LONG i{ 0 }; i < psLibrary.size(); i++)
+	{
+		if ((i + 1) == psLibrary.size())
+			last_nuclide = true;
+
+		for (LONG j{ 0 }; j < psLibrary.at(i).PeakEnergy.size(); j++)
+		{
+			if ((j + 1) == psLibrary.at(i).PeakEnergy.size())
+			{
+				last_line = true;
+				if (last_nuclide && last_line)
+					do_comma = false;
+			}
+
+			index_value = psLibrary.at(i).PeakSearchResult.at(j);
+			
+			local = ReturnPeakArea(i, j);
+			AppendToOutputString(local, fwf_peak_area, true);
+
+			local.clear();
+			local = ReturnIterations(i, j);
+			AppendToOutputString(local, fwf_iterations, true);
+
+			
+			local.clear();
+			local = ReturnPeakFWHM(i, j);
+			AppendToOutputString(local, fwf_peak_fwhm, true);
+
+			local.clear();
+			local = ReturnPeakEnergy(i, j);
+			AppendToOutputString(local, fwf_peak_energy, do_comma);
+		}
+	}
+}
+
+
+std::string CNFobject::ReturnPeakArea(const USHORT nuclide, const USHORT line)
+{
+	FLOAT x = psData.Nuclides.at(nuclide).Area.at(line);
+	LONG y = ConvertFLOATtoLONG(x);
+	return std::string(ReturnFixedIntegerString(y));
+}
+
+
+LONG CNFobject::ConvertFLOATtoLONG(const FLOAT& the_float)
+{
+	return static_cast<LONG>(the_float);
+}
+
+
+std::string CNFobject::ReturnFixedIntegerString(LONG& the_number)
+{
+	std::stringstream ss;
+	ss << the_number;
+	return ss.str();
+}
+
+
+std::string CNFobject::ReturnIterations(const USHORT nuclide, const USHORT line)
+{
+	LONG ret = psData.Nuclides.at(nuclide).Iterations.at(line);
+	return std::string(ReturnFixedIntegerString(ret));
+}
+
+
+std::string CNFobject::ReturnPeakFWHM(const USHORT nuclide, const USHORT line)
+{
+	FLOAT ret = psData.Nuclides.at(nuclide).FWHM.at(line);
+	return std::string(ReturnFixedFieldWidthString(ret, fwf_precision_energy));
+}
+
+
+std::string CNFobject::ReturnPeakEnergy(const USHORT nuclide, const USHORT line)
+{
+	FLOAT ret = psData.Nuclides.at(nuclide).Energy.at(line);
+	return std::string(ReturnFixedFieldWidthString(ret, fwf_precision_energy));
 }

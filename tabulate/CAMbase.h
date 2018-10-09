@@ -45,6 +45,7 @@ public:
 	void SetStringParam(ULONG param, USHORT record, std::string& data, USHORT buff_len);
 
 	SHORT ReturnPeakSearchIndex(const OjEnergy_T& peak_to_find);
+	std::string ReturnFilename();
 
 private:
 	void CreateDataAccessInterface();
