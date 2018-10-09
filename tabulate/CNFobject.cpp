@@ -204,22 +204,25 @@ void CNFobject::PushNIDLibraryToFile()
 }
 
 void CNFobject::IDInterestingPeaks()
+// Use the SadFindRecord() function find library supplied peaks based on peak
+// energy and user supplied search tolerance. If a peak is found in data, then
+// emplace the peak index into the psLibrary.PeakSearchResult vector.
 {
 	LONG nuclide_lines;
 	SHORT match;
 	USHORT nuclide_match;
 	OjEnergy_T lib_peak;
-	// ====================================================================> STOPPED HERE 8 Oct
-	// ====================================================================> Next step, verify loop works the way I need it to
+
 	lib_peak.rToler = energy_tolerance;
 	for (LONG i{ 0 }; i < psLibrary.size(); i++)
 	{
 		nuclide_lines = psLibrary.at(i).PeakEnergy.size();
+		psLibrary.at(i).PeakSearchResult.resize(nuclide_lines);
 		for (LONG j{ 0 }; j < nuclide_lines; j++)
 		{
 			lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
 			match = ReturnPeakSearchIndex(lib_peak);
-			psLibrary.at(i).PeakSearchResult.push_back(match);
+			psLibrary.at(i).PeakSearchResult.at(j) = match;
 		}
 	}
 }
