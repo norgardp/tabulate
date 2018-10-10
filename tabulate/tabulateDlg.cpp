@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_OPTB, &CtabulateDlg::OnBnClickedRadioOptb)
 	ON_BN_CLICKED(IDC_RADIO_OPTC, &CtabulateDlg::OnBnClickedRadioOptc)
 	ON_BN_CLICKED(IDC_RADIO_OPTD, &CtabulateDlg::OnBnClickedRadioOptd)
+	ON_EN_KILLFOCUS(IDC_EDT_FILENAME, &CtabulateDlg::OnEnKillfocusEdtFilename)
 END_MESSAGE_MAP()
 
 
@@ -138,6 +139,9 @@ BOOL CtabulateDlg::OnInitDialog()
 	VectorizeDirectoryListing(&DatFiles, &DataFileListing);
 
 	SetEnergyTolerance(default_energy_tolerance);
+	
+	OutputFilename.SetCueBanner(_T("no default"));
+
 	OnBnClickedRadioOpta();
 
 	// ===================== LOCAL INITIALIZATION =====================
@@ -296,6 +300,7 @@ void CtabulateDlg::OnBnClickedBtnSelectDir()
 	}
 
 	VectorizeDirectoryListing(&DatFiles, &DataFileListing);
+	OnEnKillfocusEdtFilename();
 }
 
 
@@ -405,20 +410,6 @@ bool CtabulateDlg::LocateVectorDuplicateEntry(const std::vector<CString>* data,
 			unique = false;
 	}
 	return unique;
-}
-
-
-void CtabulateDlg::OnEnKillfocusEditEnergytol()
-// Verify user supplied energy tolerance is within "reasonable" limits as set
-// forth in the program defaults. If not, revert to default energy tolerance.
-{
-	CString windowtext;
-	PSEnergyTolerance.GetWindowTextW(windowtext);
-	double tempfloat = _ttof(windowtext);
-	if ((tempfloat > GENIE_MIN_ETOL) && (tempfloat < GENIE_MAX_ETOL))
-		EnergyTolerance = tempfloat;
-	else
-		SetEnergyTolerance(default_energy_tolerance);
 }
 
 
@@ -598,3 +589,42 @@ OutputOption CtabulateDlg::ReturnOutputOption()
 	return outoption;
 }
 
+
+void CtabulateDlg::OnEnKillfocusEditEnergytol()
+// Verify user supplied energy tolerance is within "reasonable" limits as set
+// forth in the program defaults. If not, revert to default energy tolerance.
+{
+	CString windowtext;
+	PSEnergyTolerance.GetWindowTextW(windowtext);
+	double tempfloat = _ttof(windowtext);
+	if ((tempfloat > GENIE_MIN_ETOL) && (tempfloat < GENIE_MAX_ETOL))
+		EnergyTolerance = tempfloat;
+	else
+		SetEnergyTolerance(default_energy_tolerance);
+}
+
+
+void CtabulateDlg::OnEnKillfocusEdtFilename()
+{
+	CString full_path(CreateFilename(labelDataDir, OutputFilename));
+	CString base_filename;
+
+	OutputFilename.GetWindowTextW(base_filename);
+	if (!(base_filename.IsEmpty()))
+	{
+		CFile myfile;
+		CFileStatus file_status;
+		if (myfile.GetStatus(full_path.GetBuffer(), file_status) == TRUE)
+			AfxMessageBox(_T("Outupt file already exists"));
+		full_path.ReleaseBuffer();
+	}
+}
+
+
+CString CtabulateDlg::CreateFilename(const CStatic& directory, const CEdit& filename)
+{
+	CString filename_text, pathname_text;
+	filename.GetWindowTextW(filename_text);
+	directory.GetWindowTextW(pathname_text);
+	return (pathname_text + filename_text);
+}

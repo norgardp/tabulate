@@ -93,9 +93,10 @@ private:
 	std::string ReturnOutputFilename(); 
 	DataStructure::InitializationOptions ObtainInitializationOptions();
 	void ButtonHandler();
-	
+	CString CreateFilename(const CStatic& directory, const CEdit& filename);
 	void WriteHeaderData(const std::string& start_file, const std::string& end_file);
 
 public:
 	CEdit OutputFilename;
+	afx_msg void OnEnKillfocusEdtFilename();
 };
