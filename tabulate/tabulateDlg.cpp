@@ -482,20 +482,19 @@ void CtabulateDlg::OnBnClickedOk()
 	DataStructure::InitializationOptions options;
 	options = ObtainInitializationOptions();
 	
-	// temporary output; I will createa  file stream and direct the ReturnFormattedLine() function
-	// to the output stream
-	std::string out;
-	
-
-	
-
-	int data_count{ LibraryContentListing.GetCount() };
-	--data_count;
-	for (int i{ 0 }; i < data_count; i++)
+	if (output_file_status)
 	{
-		CNFobject data(options);
-		data.CreateInstance(ReturnDataFilename(i));
-		out = data.ReturnFormattedLine();
+		// Prepare output file for data
+		std::ofstream myFile(OpenFileForOutput());
+
+		for (auto i{ 0 }; i < DatFiles.size(); i++)
+		{
+			CNFobject data(options);
+			data.CreateInstance(ReturnDataFilename(i));
+			myFile << data.ReturnFormattedLine() << std::endl;
+		}
+
+		myFile.close();
 	}
 }
 
@@ -529,15 +528,9 @@ std::string CtabulateDlg::ReturnLibraryFilename()
 
 std::string CtabulateDlg::ReturnDataFilename(const int i)
 {
-	std::string ret;
-	CString datfile{ DataDirectory };
-	int sel = DataFileListing.GetCurSel();
-	if (sel != LB_ERR)
-	{
-		datfile += GetListBoxSelection(DataFileListing, sel);
-		ret = CW2A(datfile);
-	}
-	return ret;
+	CString data_file(DataDirectory);
+	data_file.Append(DatFiles.at(i));
+	return CW2A(data_file);
 }
 
 
@@ -618,6 +611,11 @@ void CtabulateDlg::OnEnKillfocusEdtFilename()
 		if (myfile.GetStatus(full_path.GetBuffer(), file_status) == TRUE)
 			AfxMessageBox(_T("Outupt file already exists"));
 		full_path.ReleaseBuffer();
+		output_file_status = true;
+	}
+	else
+	{
+		output_file_status = false;
 	}
 }
 
@@ -629,3 +627,14 @@ CString CtabulateDlg::CreateFilename(const CStatic& directory, const CEdit& file
 	directory.GetWindowTextW(pathname_text);
 	return (pathname_text + filename_text);
 }
+
+
+std::ofstream CtabulateDlg::OpenFileForOutput()
+{
+	CString fullpath(CreateFilename(labelDataDir, OutputFilename));
+	std::string stdstr_path = CW2A(fullpath);
+	std::ofstream FP;
+	FP.open(stdstr_path, std::ios::out | std::ios::trunc);
+	return FP;
+}
+

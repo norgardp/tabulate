@@ -73,7 +73,7 @@ private:
 	int LibFileCount;
 	int DatFileCount;
 	double EnergyTolerance;
-	
+	bool output_file_status{ false };
 
 private:
 	void SetEnergyTolerance(const double f);
@@ -90,10 +90,12 @@ private:
 	std::string ReturnLibraryFilename();
 	std::string ReturnDataFilename(const int i);
 	std::string ReturnAnalysisFilename();
-	std::string ReturnOutputFilename(); 
 	DataStructure::InitializationOptions ObtainInitializationOptions();
 	void ButtonHandler();
 	CString CreateFilename(const CStatic& directory, const CEdit& filename);
+	
+	std::ofstream OpenFileForOutput();
+
 	void WriteHeaderData(const std::string& start_file, const std::string& end_file);
 
 public:

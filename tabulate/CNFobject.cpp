@@ -362,7 +362,7 @@ void CNFobject::WriteNuclideDataType(const size_t line, const bool final_element
 void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_width)
 {
 	std::stringstream().swap(ss);
-	ss << std::setw(field_width);
+	ss << std::setw(field_width) << std::fixed;
 }
 
 
