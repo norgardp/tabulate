@@ -71,6 +71,7 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_LIBCONTENT, LibraryContentListing);
 	DDX_Control(pDX, IDC_CHK_OVERWRITE, OverwriteMode);
 	DDX_Radio(pDX, IDC_RADIO_OPTA, (int&)OutputOptionRB);
+	DDX_Control(pDX, IDC_EDT_FILENAME, OutputFilename);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -492,6 +493,9 @@ void CtabulateDlg::OnBnClickedOk()
 	// temporary output; I will createa  file stream and direct the ReturnFormattedLine() function
 	// to the output stream
 	std::string out;
+	
+
+	
 
 	int data_count{ LibraryContentListing.GetCount() };
 	--data_count;

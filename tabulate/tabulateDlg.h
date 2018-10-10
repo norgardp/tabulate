@@ -7,6 +7,7 @@
 #include "afxcmn.h"
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "ProgramDefaults.h"
 #include "CNFobject.h"
@@ -89,7 +90,12 @@ private:
 	std::string ReturnLibraryFilename();
 	std::string ReturnDataFilename(const int i);
 	std::string ReturnAnalysisFilename();
+	std::string ReturnOutputFilename(); 
 	DataStructure::InitializationOptions ObtainInitializationOptions();
 	void ButtonHandler();
+	
+	void WriteHeaderData(const std::string& start_file, const std::string& end_file);
 
+public:
+	CEdit OutputFilename;
 };

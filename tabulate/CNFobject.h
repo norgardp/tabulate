@@ -48,13 +48,18 @@ private:
 	void PushNIDLibraryToFile();
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
+
+	void WriteHeaderData();
 	void WriteCommonData();
 	void WriteCommonDataType();
-	std::string ReturnSimpleFilename();
 	void WriteNuclideData();
+	void WriteNuclideDataType(const size_t line, const bool final_element);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
-	void WriteNuclideDataType(const size_t line, const bool final_element);
+	void WriteStreamDataStr(std::stringstream& ss, std::string& the_string, const bool last);
+	template <typename T>
+	void WriteStreamData(std::stringstream& ss, T& param, const bool last);
+	std::string ReturnSimpleFilename();
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
@@ -70,3 +75,12 @@ private:
 	LibraryDimension libDim;
 	std::string output_string;
 };
+
+template <typename T>
+void CNFobject::WriteStreamData(std::stringstream& ss, T& param, const bool last)
+{
+	ss << param;
+	output_string.append(ss.str());
+	if (!last)
+		output_string.append(std::string(", "));
+}
