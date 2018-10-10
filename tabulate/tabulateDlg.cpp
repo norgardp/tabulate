@@ -382,6 +382,7 @@ void CtabulateDlg::OnBnClickedBtnFileremove()
 void CtabulateDlg::OnBnClickedBtnFileremoveall()
 {
 	DataFileListing.ResetContent();
+	DatFiles.clear();
 }
 
 
