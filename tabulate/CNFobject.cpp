@@ -223,7 +223,6 @@ void CNFobject::IDInterestingPeaks()
 
 std::string CNFobject::ReturnFormattedLine()
 {  
-	WriteHeaderData();
 	WriteCommonData();
 	WriteCommonDataType();
 	WriteNuclideData();
@@ -233,12 +232,6 @@ std::string CNFobject::ReturnFormattedLine()
 
 
 // ============================================================================================
-
-void CNFobject::WriteHeaderData()
-{
-
-}
-
 
 void CNFobject::WriteCommonData()
 {

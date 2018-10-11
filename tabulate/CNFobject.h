@@ -49,7 +49,6 @@ private:
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
 
-	void WriteHeaderData();
 	void WriteCommonData();
 	void WriteCommonDataType();
 	void WriteNuclideData();
