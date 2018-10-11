@@ -62,13 +62,14 @@ private:
 	void InsertEndline();
 	void WriteCommonDataType();
 	void WriteNuclideData();
-	void WriteNuclideDataType(const size_t line, const bool final_element);
+	void WriteNuclideDataType(const int line, const bool final_element);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
 	void WriteStreamDataStr(std::stringstream& ss, std::string& the_string, const bool last);
 	template <typename T>
 	void WriteStreamData(std::stringstream& ss, T& param, const bool last);
 	std::string ReturnSimpleFilename();
+	DataStructure::DataStruct MakeBlank();
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;

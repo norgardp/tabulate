@@ -499,7 +499,7 @@ void CNFobject::WriteEmptyNuclideDataType2(const size_t i, const size_t j, const
 
 	case OutputOption::b:
 		// Nulcide data: peak area, FWHM
-		local_string = psLibrary.at(i).PeakEnergy.at(j);
+		local_string = std::to_string(psLibrary.at(i).PeakEnergy.at(j));
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
 		WriteStreamDataStr(ss, local_string, false);
 		ss << std::right;
@@ -510,7 +510,7 @@ void CNFobject::WriteEmptyNuclideDataType2(const size_t i, const size_t j, const
 
 	case OutputOption::c:
 		// Nuclide data: peak area, error (%), FWHM, peak energy
-		local_string = psLibrary.at(i).PeakEnergy.at(j);
+		local_string = std::to_string(psLibrary.at(i).PeakEnergy.at(j));
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
 		WriteStreamDataStr(ss, local_string, false);
 		ss << std::right;
@@ -529,7 +529,7 @@ void CNFobject::WriteEmptyNuclideDataType2(const size_t i, const size_t j, const
 
 	case OutputOption::d:
 		// Nuclide data: peak area, FWHM, error (%)
-		local_string = psLibrary.at(i).PeakEnergy.at(j);
+		local_string = std::to_string(psLibrary.at(i).PeakEnergy.at(j));
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
 		WriteStreamDataStr(ss, local_string, false);
 		ss << std::right;
@@ -598,52 +598,65 @@ void CNFobject::WriteNuclideData()
 	}
 }
 
-void CNFobject::WriteNuclideDataType(const size_t line, const bool final_element)
+void CNFobject::WriteNuclideDataType(const int line, const bool final_element)
 {
 	std::stringstream ss;
+	DataStructure::DataStruct data;
+	size_t lline;
+
+	if (line >= 0)
+	{
+		data = psData;
+		lline = line;
+	}
+	else
+	{
+		data = MakeBlank();
+		lline = 0;
+	}
 
 	switch (output_option)
 	{
 	case OutputOption::a:
 		// Nuclide data: peak area, iterations, FWHM, energy
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, psData.Nuclides.at(line).Area, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
 		SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
-		WriteStreamData(ss, psData.Nuclides.at(line).Iterations, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Iterations, false);
 		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, psData.Nuclides.at(line).FWHM, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, false);
 		SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
-		WriteStreamData(ss, psData.Nuclides.at(line).Energy, final_element);
+		WriteStreamData(ss, data.Nuclides.at(lline).Energy, final_element);
 		break;
 
 	case OutputOption::b:
 		// Nulcide data: peak area, FWHM
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, psData.Nuclides.at(line).Area, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
 		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, psData.Nuclides.at(line).FWHM, final_element);
+		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, final_element);
 		break;
 
 	case OutputOption::c:
 		// Nuclide data: peak area, error (%), FWHM, peak energy
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, psData.Nuclides.at(line).Area, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
 		SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
-		WriteStreamData(ss, psData.Nuclides.at(line).Error, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Error, false);
 		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, psData.Nuclides.at(line).FWHM, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, false);
 		SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
-		WriteStreamData(ss, psData.Nuclides.at(line).Energy, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Energy, false);
 		break;
 
 	case OutputOption::d:
 		// Nuclide data: peak area, FWHM, error (%)
 		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, psData.Nuclides.at(line).Area, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
 		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, psData.Nuclides.at(line).FWHM, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, false);
 		SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
-		WriteStreamData(ss, psData.Nuclides.at(line).Error, false);
+		WriteStreamData(ss, data.Nuclides.at(lline).Error, false);
 		break;
 	}
 }
@@ -701,4 +714,18 @@ void CNFobject::InsertEndline()
 	std::stringstream ss;
 	ss << std::endl;
 	output_string.append(ss.str());
+}
+
+
+DataStructure::DataStruct CNFobject::MakeBlank()
+{
+	DataStructure::DataStruct return_value;
+	return_value.Nuclides.resize(1);
+	return_value.Nuclides.at(0).Area = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).Energy = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).Error = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).FWHM = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).Iterations = static_cast<LONG>(0.0);
+	return_value.Nuclides.at(0).Rate = static_cast<FLOAT>(0.0);
+	return return_value;
 }
