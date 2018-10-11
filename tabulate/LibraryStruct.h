@@ -11,7 +11,7 @@ struct LibraryStruct
 {
 	std::string NuclideName;		// CAM_T_NCLNAME
 	std::vector<FLOAT> PeakEnergy;	// CAM_F_NLENERGY
-	std::vector<USHORT> PeakSearchResult;
+	std::vector<int> PeakSearchResult;
 };
 
 struct LibraryDimension

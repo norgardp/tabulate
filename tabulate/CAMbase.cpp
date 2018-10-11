@@ -209,10 +209,10 @@ void CAMbase::SetStringParam(ULONG param, USHORT record, std::string& data, USHO
 		ReportSadError(ret);
 }
 
-SHORT CAMbase::ReturnPeakSearchIndex(const OjEnergy_T& find_me)
+int CAMbase::ReturnPeakSearchIndex(const OjEnergy_T& find_me)
 {
 	OjEnergy_T loc_findme = find_me;
-	SHORT ret;
+	int ret;
 	USHORT match;
 	FLAG found;
 
@@ -225,11 +225,11 @@ SHORT CAMbase::ReturnPeakSearchIndex(const OjEnergy_T& find_me)
 	else
 	{
 		if (found == TRUE)
-			ret = (SHORT)match;
+			ret = match;
 		else
 			ret = -1;
 	}
-	return (ret - 1);
+	return ret;
 }
 
 

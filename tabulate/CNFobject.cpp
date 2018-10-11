@@ -580,7 +580,7 @@ void CNFobject::WriteNuclideData()
 	size_t max_line;
 	size_t max_peaks{ psData.Nuclides.size() };
 	std::stringstream ss;
-	USHORT use_nuclide;
+	int use_nuclide;
 
 	for (size_t i{ 0 }; i < max_file; i++)
 	{
@@ -592,8 +592,7 @@ void CNFobject::WriteNuclideData()
 			if (last_file && last_line)
 				last_element = true;
 			use_nuclide = psLibrary.at(i).PeakSearchResult.at(j);
-			if(use_nuclide > 0)
-				WriteNuclideDataType(static_cast<size_t>(--use_nuclide), last_element);
+			WriteNuclideDataType(use_nuclide, last_element);
 		}
 
 	}
