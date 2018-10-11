@@ -28,6 +28,7 @@ public:
 
 	void CreateInstance(const std::string& data_name);
 	std::string ReturnFormattedLine();
+	std::string ReturnFormattedHeader();
 
 private:
 	void InitializeSequenceAnalyzer(); 
@@ -49,15 +50,25 @@ private:
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
 
+
 	void WriteCommonData();
+	void WriteCommonLibraryData();
+	void WriteCommonLibraryData2();
+	void WriteCommonLibraryTypeData();
+	void WriteCommonLibraryTypeData2();
+	void WriteCommonLibraryNuclideData();
+	void WriteEmptyNuclideDataType(const size_t i, const size_t j, const bool last_element);
+	void WriteEmptyNuclideDataType2(const size_t i, const size_t j, const bool last_element);
+	void InsertEndline();
 	void WriteCommonDataType();
 	void WriteNuclideData();
 	void WriteNuclideDataType(const size_t line, const bool final_element);
-	void SetStreamParameters(std::stringstream& ss, const size_t field_width);
+	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
 	void WriteStreamDataStr(std::stringstream& ss, std::string& the_string, const bool last);
 	template <typename T>
 	void WriteStreamData(std::stringstream& ss, T& param, const bool last);
+	std::string ReturnSimpleFilename();
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
@@ -80,5 +91,5 @@ void CNFobject::WriteStreamData(std::stringstream& ss, T& param, const bool last
 	ss << param;
 	output_string.append(ss.str());
 	if (!last)
-		output_string.append(std::string(", "));
+		output_string.append(",");
 }

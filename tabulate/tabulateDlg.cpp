@@ -489,13 +489,15 @@ void CtabulateDlg::OnBnClickedOk()
 		
 		// Write header data
 		myFile << ReturnHeaderData(DatFiles.front(), DatFiles.back());
-
+		
 		int sizeola(DatFiles.size());
 		for (auto i{ 0 }; i < sizeola; i++)
 		{
 			CNFobject data(options);
 			data.CreateInstance(ReturnDataFilename(i));
-			myFile << data.ReturnFormattedLine() << std::endl;
+			if (i == 0)
+				myFile << data.ReturnFormattedHeader();
+			myFile << data.ReturnFormattedLine();
 		}
 
 		myFile.close();
@@ -659,3 +661,4 @@ std::string CtabulateDlg::ReturnHeaderData(const CString start_file, const CStri
 	
 	return return_string;
 }
+
