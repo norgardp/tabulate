@@ -371,7 +371,7 @@ void CNFobject::WriteStreamDataStr(std::stringstream& ss, std::string& param, co
 	std::string local_string(ss.str());
 	output_string.append(local_string);
 	if (!last)
-		output_string.append(std::string("\,"));
+		output_string.append(std::string(" ,"));
 }
 
 

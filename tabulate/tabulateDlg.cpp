@@ -486,8 +486,12 @@ void CtabulateDlg::OnBnClickedOk()
 	{
 		// Prepare output file for data
 		std::ofstream myFile(OpenFileForOutput());
+		
+		// Write header data
+		myFile << ReturnHeaderData(DatFiles.front(), DatFiles.back());
 
-		for (auto i{ 0 }; i < DatFiles.size(); i++)
+		int sizeola(DatFiles.size());
+		for (auto i{ 0 }; i < sizeola; i++)
 		{
 			CNFobject data(options);
 			data.CreateInstance(ReturnDataFilename(i));
@@ -530,7 +534,7 @@ std::string CtabulateDlg::ReturnDataFilename(const int i)
 {
 	CString data_file(DataDirectory);
 	data_file.Append(DatFiles.at(i));
-	return CW2A(data_file);
+	return std::string(CW2A(data_file));
 }
 
 
@@ -638,3 +642,20 @@ std::ofstream CtabulateDlg::OpenFileForOutput()
 	return FP;
 }
 
+std::string CtabulateDlg::ReturnHeaderData(const CString start_file, const CString end_file)
+{
+	std::string front = CW2A(start_file);
+	std::string back = CW2A(end_file);
+	std::string return_string;
+
+	return_string.append("Summary of spectral data (Peak Area)");
+	return_string += '\n';
+
+	return_string.append("for: ");
+	return_string += front + '\n';
+
+	return_string.append("thru: ");
+	return_string += back + '\n';
+	
+	return return_string;
+}

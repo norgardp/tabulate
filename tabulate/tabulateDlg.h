@@ -96,7 +96,7 @@ private:
 	
 	std::ofstream OpenFileForOutput();
 
-	void WriteHeaderData(const std::string& start_file, const std::string& end_file);
+	std::string ReturnHeaderData(const CString start_file, const CString end_file);
 
 public:
 	CEdit OutputFilename;

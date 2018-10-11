@@ -58,7 +58,6 @@ private:
 	void WriteStreamDataStr(std::stringstream& ss, std::string& the_string, const bool last);
 	template <typename T>
 	void WriteStreamData(std::stringstream& ss, T& param, const bool last);
-	std::string ReturnSimpleFilename();
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
