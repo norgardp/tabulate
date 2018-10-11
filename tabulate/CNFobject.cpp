@@ -591,9 +591,9 @@ void CNFobject::WriteNuclideData()
 			last_line = ((j + 1) == max_line) ? true : false;
 			if (last_file && last_line)
 				last_element = true;
-			use_nuclide = psLibrary.at(i).PeakSearchResult.at(j) - 1;
-			if(use_nuclide < max_peaks)
-				WriteNuclideDataType(static_cast<size_t>(use_nuclide), last_element);
+			use_nuclide = psLibrary.at(i).PeakSearchResult.at(j);
+			if(use_nuclide > 0)
+				WriteNuclideDataType(static_cast<size_t>(--use_nuclide), last_element);
 		}
 
 	}
