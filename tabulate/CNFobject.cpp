@@ -359,7 +359,7 @@ void CNFobject::WriteNuclideDataType(const size_t line, const bool final_element
 void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_width)
 {
 	std::stringstream().swap(ss);
-	ss << std::setw(field_width) << std::setfill('_') << std::left;
+	ss << std::left << std::setw(field_width);
 }
 
 
@@ -373,7 +373,10 @@ void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_wi
 
 void CNFobject::WriteStreamDataStr(std::stringstream& ss, std::string& param, const bool last)
 {
-	output_string.append(param);
+	
+	ss << param;
+	std::string local_string(ss.str());
+	output_string.append(local_string);
 	if (!last)
 		output_string.append(std::string("\,"));
 }
