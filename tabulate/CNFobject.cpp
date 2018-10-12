@@ -268,12 +268,10 @@ std::string CNFobject::ReturnFormattedHeader()
 {
 	output_string.clear();
 	std::stringstream ss;
-	bool use_descriptors{ true };
 
-	// Write two-line header
+	bool use_descriptors{ true };
 	WriteNuclideHeader(ss, !use_descriptors);
 	WriteNuclideHeader(ss, use_descriptors);
-
 	return output_string;
 }
 
@@ -699,6 +697,7 @@ void CNFobject::WriteStreamDataStr(std::stringstream& ss, std::string& param, co
 
 void CNFobject::InsertEndline(std::stringstream& ss)
 {
+	std::stringstream().swap(ss);
 	ss << std::endl;
 	output_string.append(ss.str());
 }
