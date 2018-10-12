@@ -2,6 +2,13 @@
 #include "CNFobject.h"
 
 
+// ========================================================================
+//
+// ========================= OBJECT INSTANTIATION =========================
+//
+// ========================================================================
+
+
 CNFobject::CNFobject()
 {
 }
@@ -120,6 +127,13 @@ void CNFobject::OpenDatafile(const std::string& datafile)
 }
 
 
+// ===============================================================================
+//
+// ========================= NUCLIDE ANALYSIS and IMPORT =========================
+//
+// ===============================================================================
+
+
 void CNFobject::PerformAnalysis()
 {
 	_bstr_t fake;
@@ -198,8 +212,48 @@ void CNFobject::IDInterestingPeaks()
 	}
 }
 
-// ============================================================================================
-// The following section is for generating output
+
+void CNFobject::FindLibraryPeakInData(const FLOAT centroid, const FLOAT tolerance,
+	std::string nuclide_name)
+{
+	FLOAT hilimit{ centroid + tolerance / 2 };
+	FLOAT lolimit{ centroid - tolerance / 2 };
+	size_t total_found_peaks{ psData.Nuclides.size() };
+	bool peak_was_not_found{ true };
+
+	for (size_t i{ 0 }; i < total_found_peaks; i++)
+	{
+		FLOAT peak_energy{ psData.Nuclides.at(i).Energy };
+		if ((peak_energy > lolimit) && (peak_energy < hilimit))
+		{
+			// peak was found
+			peak_was_not_found = false;
+			psDataFound.Nuclides.push_back(psData.Nuclides.at(i));
+			psData.Nuclides.erase(psData.Nuclides.begin() + i);
+			total_found_peaks--;
+			i--;
+			size_t current_iterator = psDataFound.Nuclides.size() - 1;
+			psDataFound.Nuclides.at(current_iterator).NucName = nuclide_name;
+			psDataFound.Nuclides.at(current_iterator).IdealEnergy = centroid;
+			break;
+		}
+	}
+
+	if (peak_was_not_found)
+	{
+		NoData = MakeBlank();
+		NoData.Nuclides.at(0).NucName = nuclide_name;
+		NoData.Nuclides.at(0).IdealEnergy = centroid;
+		psDataFound.Nuclides.push_back(NoData.Nuclides.at(0));
+	}
+}
+
+
+// ======================================================================
+//
+// ========================= HEADER FILE OUTPUT =========================
+//
+// ======================================================================
 
 // Output file header construction looks generally like this:
 // [header info supplied by primary routine]
@@ -220,19 +274,6 @@ std::string CNFobject::ReturnFormattedHeader()
 	WriteNuclideHeader(ss, !use_descriptors);
 	WriteNuclideHeader(ss, use_descriptors);
 
-	return output_string;
-}
-
-
-std::string CNFobject::ReturnFormattedLine()
-{  
-	output_string.clear();
-	std::stringstream ss;
-
-	WriteCommonData(ss);
-	WriteCommonDataType(ss);
-	WriteNuclideData(ss);
-	InsertEndline(ss);
 	return output_string;
 }
 
@@ -305,10 +346,14 @@ void CNFobject::WriteHeaderNuclide(std::stringstream& ss, const size_t i, const 
 	std::string param1, param2, param3;
 	size_t max_nuclides{ psDataFound.Nuclides.size() };
 	
-	WritePeakEnergyHeaderValue(ss, i);
+	if (use_descriptors)
+		WriteHeaderPeakEnergy(ss, i);
+	else
+		WriteHeaderPeakName(ss, i);
+		
+
 	switch (output_option)
 	{
-
 	case OutputOption::a:
 		param1 = (use_descriptors) ? std::string("IT") : std::string(fwf_iterations, ' ');
 		param2 = (use_descriptors) ? std::string("FWHM") : std::string(fwf_peak_fwhm, ' ');
@@ -342,53 +387,34 @@ void CNFobject::WriteHeaderNuclide(std::stringstream& ss, const size_t i, const 
 }
 
 
+// =======================================================================
+//
+// ========================= NUCLIDE DATA OUTPUT =========================
+//
+// =======================================================================
 
-void CNFobject::WriteCommonData(std::stringstream& ss)
+
+std::string CNFobject::ReturnFormattedLine()
+{
+	output_string.clear();
+	std::stringstream ss;
+
+	WriteDataCommon(ss);
+	WriteDataModeData(ss);
+	WriteDataNuclide(ss);
+	InsertEndline(ss);
+	return output_string;
+}
+
+
+void CNFobject::WriteDataCommon(std::stringstream& ss)
 {
 	WriteCAMFilename(ss);
 	WriteCAMAcquisitionTime(ss);
 }
-/*
-void CNFobject::WriteEmptyNuclideDataType(std::stringstream& ss, const size_t i, const bool last_element)
-{
-//	std::stringstream ss;
-	std::string local_string;
 
-	switch (output_option)
-	{
-	case OutputOption::a:
-		// Nuclide data: peak area, iterations, FWHM, energy
-		WritePeakEnergyHeaderValue(ss, i);
-		WritePeaksearchIterations(ss, std::string("IT"), false);
-		WritePeakWidth(ss, std::string("FWHM"), false);
-		WritePeakEnergy(ss, std::string("Energy"), last_element);
-		break;
 
-	case OutputOption::b:
-		// Nulcide data: peak area, FWHM
-		WritePeakEnergyHeaderValue(ss, i);
-		WritePeakWidth(ss, std::string("FWHM"), last_element);
-		break;
-
-	case OutputOption::c:
-		// Nuclide data: peak area, error (%), FWHM, peak energy
-		WritePeakEnergyHeaderValue(ss, i);
-		WritePeakError(ss, std::string("%Err"), false);
-		WritePeakWidth(ss, std::string("FWHM"), false);
-		WritePeakEnergy(ss, std::string("Energy"), last_element);
-		break;
-
-	case OutputOption::d:
-		// Nuclide data: peak area, FWHM, error (%)
-		WritePeakEnergyHeaderValue(ss, i);
-		WritePeakWidth(ss, std::string("FWHM"), false);
-		WritePeakError(ss, std::string("%Err"), last_element);
-		break;
-	}
-}
-*/
-
-void CNFobject::WriteCommonDataType(std::stringstream& ss)
+void CNFobject::WriteDataModeData(std::stringstream& ss)
 {
 	switch (output_option)
 	{
@@ -407,7 +433,7 @@ void CNFobject::WriteCommonDataType(std::stringstream& ss)
 }
 
 
-void CNFobject::WriteNuclideData(std::stringstream& ss)
+void CNFobject::WriteDataNuclide(std::stringstream& ss)
 {
 	bool last_element{ false };
 	size_t max_nuclides{ psDataFound.Nuclides.size() };
@@ -415,12 +441,12 @@ void CNFobject::WriteNuclideData(std::stringstream& ss)
 	{
 		if (i == (max_nuclides - 1))
 			last_element = true;
-		WriteNuclideDataType(ss, i, last_element);
+		WriteDataNuclideMode(ss, i, last_element);
 	}
 }
 
 
-void CNFobject::WriteNuclideDataType(std::stringstream& ss, const size_t i, const bool final_element)
+void CNFobject::WriteDataNuclideMode(std::stringstream& ss, const size_t i, const bool final_element)
 {
 	switch (output_option)
 	{
@@ -452,6 +478,28 @@ void CNFobject::WriteNuclideDataType(std::stringstream& ss, const size_t i, cons
 }
 
 
+// ==============================================================================
+//
+// ========================= OUTPUT FORMATING FUNCTIONS =========================
+//
+// ==============================================================================
+
+
+// --------------> Header File Stuff
+void CNFobject::WriteHeaderPeakName(std::stringstream& ss, const size_t i)
+{
+	SetStreamParameters(ss, fwf_peak_area, false);
+	WriteStreamDataStr(ss, psDataFound.Nuclides.at(i).NucName, false);
+}
+
+
+void CNFobject::WriteHeaderPeakEnergy(std::stringstream& ss, const size_t i)
+{
+	SetStreamParameters(ss, fwf_peak_area, fwf_precision_energy);
+	WriteStreamData(ss, psDataFound.Nuclides.at(i).IdealEnergy , false);
+}
+// <------------- Header File Stuff
+
 void CNFobject::WritePeakArea(std::stringstream& ss, const size_t i, const bool final_element)
 {
 	SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
@@ -463,13 +511,6 @@ void CNFobject::WritePeakArea(std::stringstream& ss, const std::string user_stri
 {
 	SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
 	WriteStreamData(ss, user_string, final_element);
-}
-
-
-void CNFobject::WritePeakArea(std::stringstream& ss, bool final_element)
-{
-	SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-	WriteStreamData(ss, std::string(fwf_peak_area, ' '), final_element);
 }
 
 
@@ -494,13 +535,6 @@ void CNFobject::WritePeakEnergy(std::stringstream& ss, bool final_element)
 }
 
 
-void CNFobject::WritePeakEnergyHeaderValue(std::stringstream& ss, const size_t i)
-{
-	SetStreamParameters(ss, fwf_peak_area, fwf_precision_energy);
-	WriteStreamData(ss, psDataFound.Nuclides.at(i).IdealEnergy, false);
-}
-
-
 void CNFobject::WritePeakError(std::stringstream& ss, const size_t i, const bool final_element)
 {
 	SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
@@ -512,13 +546,6 @@ void CNFobject::WritePeakError(std::stringstream& ss, const std::string user_str
 {
 	SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
 	WriteStreamData(ss, user_string, final_element);
-}
-
-
-void CNFobject::WritePeakError(std::stringstream& ss, bool final_element)
-{
-	SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
-	WriteStreamData(ss, std::string(fwf_peak_error, ' '), final_element);
 }
 
 
@@ -536,13 +563,6 @@ void CNFobject::WritePeakWidth(std::stringstream& ss, const std::string user_str
 }
 
 
-void CNFobject::WritePeakWidth(std::stringstream& ss, bool final_element)
-{
-	SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-	WriteStreamData(ss, std::string(fwf_peak_fwhm, ' '), final_element);
-}
-
-
 void CNFobject::WritePeaksearchIterations(std::stringstream& ss, const size_t i, const bool final_element)
 {
 	SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
@@ -554,13 +574,6 @@ void CNFobject::WritePeaksearchIterations(std::stringstream& ss, const std::stri
 {
 	SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
 	WriteStreamData(ss, user_string, final_element);
-}
-
-
-void CNFobject::WritePeaksearchIterations(std::stringstream& ss, bool final_element)
-{
-	SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
-	WriteStreamData(ss, std::string(fwf_iterations, ' '), final_element);
 }
 
 
@@ -648,6 +661,13 @@ void CNFobject::WriteCAMSampleID(std::stringstream& ss, std::string user_string)
 }
 
 
+// ===========================================================================
+//
+// ========================= OUTPUT STREAM FUNCTIONS =========================
+//
+// ===========================================================================
+
+
 void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align)
 {
 	std::stringstream().swap(ss);
@@ -677,6 +697,20 @@ void CNFobject::WriteStreamDataStr(std::stringstream& ss, std::string& param, co
 }
 
 
+void CNFobject::InsertEndline(std::stringstream& ss)
+{
+	ss << std::endl;
+	output_string.append(ss.str());
+}
+
+
+// ===========================================================================
+//
+// ========================= MISCELLANEOUS FUNCTIONS =========================
+//
+// ===========================================================================
+
+
 std::string CNFobject::ReturnSimpleFilename()
 {
 	std::string filename = ReturnFilename();
@@ -692,49 +726,6 @@ std::string CNFobject::ReturnSimpleFilename()
 		filename.erase(period_index);
 
 	return filename;
-}
-
-
-void CNFobject::InsertEndline(std::stringstream& ss)
-{
-	ss << std::endl;
-	output_string.append(ss.str());
-}
-
-
-void CNFobject::FindLibraryPeakInData(const FLOAT centroid, const FLOAT tolerance,
-	std::string nuclide_name)
-{
-	FLOAT hilimit{ centroid + tolerance / 2 };
-	FLOAT lolimit{ centroid - tolerance / 2 };
-	size_t total_found_peaks{ psData.Nuclides.size() };
-	bool peak_was_not_found{ true };
-
-	for (size_t i{ 0 }; i < total_found_peaks; i++)
-	{
-		FLOAT peak_energy{ psData.Nuclides.at(i).Energy };
-		if ((peak_energy > lolimit) && (peak_energy < hilimit))
-		{
-			// peak was found
-			peak_was_not_found = false;
-			psDataFound.Nuclides.push_back(psData.Nuclides.at(i));
-			psData.Nuclides.erase(psData.Nuclides.begin() + i);
-			total_found_peaks--;
-			i--;
-			size_t current_iterator = psDataFound.Nuclides.size() - 1;
-			psDataFound.Nuclides.at(current_iterator).NucName = nuclide_name;
-			psDataFound.Nuclides.at(current_iterator).IdealEnergy = centroid;
-			break;
-		}
-	}
-
-	if (peak_was_not_found)
-	{
-		NoData = MakeBlank();
-		NoData.Nuclides.at(0).NucName = nuclide_name;
-		NoData.Nuclides.at(0).IdealEnergy = centroid;
-		psDataFound.Nuclides.push_back(NoData.Nuclides.at(0));
-	}
 }
 
 

@@ -31,6 +31,7 @@ public:
 	std::string ReturnFormattedHeader();
 
 private:
+	// Initialization functions
 	void InitializeSequenceAnalyzer(); 
 	void SetLibraryFilename(const std::string library_name);
 	void SetAnalysisFilename(const std::string analysis_name);
@@ -40,6 +41,8 @@ private:
 	void SetLibraryDimensions(const std::vector<LibraryStruct>& library_struc);
 	void UnpackInitilizerStruct(const DataStructure::InitializationOptions& init_options);
 	void OpenDatafile(const std::string& datafile);
+
+	// Nuclide analysis and data import
 	void PerformAnalysis();
 	void PopulateDataStructure();
 	void ResizeDataStructure();
@@ -47,7 +50,6 @@ private:
 	void PopulateNuclideData();
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
-
 	void FindLibraryPeakInData(const FLOAT centroid, const FLOAT tolerance, const std::string nuclide_name);
 
 	// Header file generating functions
@@ -55,53 +57,39 @@ private:
 	void WriteHeaderCommonData(std::stringstream& ss, const bool use_descriptors);
 	void WriteHeaderModeData(std::stringstream& ss, const bool use_descriptors);
 	void WriteHeaderNuclide(std::stringstream& ss, const size_t i, const bool use_descriptors, const bool last_line);
+	void WriteHeaderPeakName(std::stringstream& ss, const size_t i);
+	void WriteHeaderPeakEnergy(std::stringstream& ss, const size_t i);
 
+	// Main body generating functions
+	void WriteDataCommon(std::stringstream& ss);
+	void WriteDataModeData(std::stringstream& ss);
+	void WriteDataNuclide(std::stringstream& ss);
+	void WriteDataNuclideMode(std::stringstream& ss, const size_t i, const bool final_element);
 
-
-	void WriteCommonData(std::stringstream& ss);
-
-	
-	
-	//void WriteCommonLibraryNuclideData(std::stringstream& ss);
-
-	void WriteEmptyNuclideDataType(std::stringstream& ss, const size_t i, const bool last_element);
-	
-
-	//void WriteEmptyNuclideDataType2(const size_t i, const size_t j, const bool last_element);
-	void InsertEndline(std::stringstream& ss);
-	void WriteCommonDataType(std::stringstream& ss);
-	void WriteNuclideData(std::stringstream& ss);
-	void WriteNuclideDataType(std::stringstream& ss, const size_t i, const bool final_element);
+	// Helper functions for generating output
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
 	void WriteStreamDataStr(std::stringstream& ss, std::string& the_string, const bool last);
 	template <typename T>
 	void WriteStreamData(std::stringstream& ss, T& param, const bool last);
+	void InsertEndline(std::stringstream& ss);
+
+	// Miscellaneous helper files
 	std::string ReturnSimpleFilename();
 	DataStructure::DataStruct MakeBlank();
 
 	// Formatted output generators
 	void WritePeakArea(std::stringstream& ss, const size_t i, const bool last_element);
 	void WritePeakArea(std::stringstream& ss, const std::string user_string, const bool last_element);
-	void WritePeakArea(std::stringstream& ss, bool last_element);
-	
 	void WritePeaksearchIterations(std::stringstream& ss, const size_t i, const bool last_element);
 	void WritePeaksearchIterations(std::stringstream& ss, const std::string user_string, const bool last_element);
-	void WritePeaksearchIterations(std::stringstream& ss, bool last_element);
-	
 	void WritePeakWidth(std::stringstream& ss, const size_t i, const bool last_element);
 	void WritePeakWidth(std::stringstream& ss, const std::string user_string, const bool last_element);
-	void WritePeakWidth(std::stringstream& ss, bool last_element);
-	
 	void WritePeakEnergy(std::stringstream& ss, const size_t i, const bool last_element);
 	void WritePeakEnergy(std::stringstream& ss, const std::string user_string, const bool last_element);
 	void WritePeakEnergy(std::stringstream& ss, bool last_element); 
-	void WritePeakEnergyHeaderValue(std::stringstream& ss, const size_t i);
-	
 	void WritePeakError(std::stringstream& ss, const size_t i, const bool last_element);
 	void WritePeakError(std::stringstream& ss, const std::string user_string, const bool last_element);
-	void WritePeakError(std::stringstream& ss, bool last_element);
-	
 	void WriteCAMFilename(std::stringstream& ss);
 	void WriteCAMFilename(std::stringstream& ss, std::string user_string);
 	void WriteCAMAcquisitionTime(std::stringstream& ss);
