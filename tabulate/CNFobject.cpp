@@ -24,6 +24,7 @@ CNFobject::CNFobject(const std::string lib_name,
 	SetOutputOption(output_opt);
 }
 
+
 CNFobject::~CNFobject()
 {
 }
@@ -85,6 +86,7 @@ void CNFobject::UnpackInitilizerStruct(const DataStructure::InitializationOption
 	SetLibraryDimensions(init.NuclidesInLibrary);
 }
 
+
 void CNFobject::CreateInstance(const std::string& datafile)
 {
 	OpenDatafile(datafile);
@@ -115,8 +117,6 @@ void CNFobject::OpenDatafile(const std::string& datafile)
 		}
 	}
 	OpenFile(datafile, open_mode, close_mode);
-	//PushEnergyToleranceToFile();
-	//PushNIDLibraryToFile();
 }
 
 
@@ -184,28 +184,9 @@ DataStructure::NuclideStructure::NuclideStruct CNFobject::ReturnNuclideInformati
 	return data;
 }
 
-void CNFobject::PushEnergyToleranceToFile()
-{
-	USHORT rec{ 1 };
-	SetNumericParam(CAM_F_TOLERANCE, rec, energy_tolerance);
-}
-
-
-void CNFobject::PushNIDLibraryToFile()
-{
-	USHORT rec{ 1 };
-
-}
 
 void CNFobject::IDInterestingPeaks()
-// Use the SadFindRecord() function find library supplied peaks based on peak
-// energy and user supplied search tolerance. If a peak is found in data, then
-// emplace the peak index into the psLibrary.PeakSearchResult vector.
 {
-	//SHORT match;
-	//OjEnergy_T lib_peak;
-
-	//lib_peak.rToler = static_cast<float>(energy_tolerance);
 	size_t max_nuclides{ psLibrary.size() };
 	size_t max_lines;
 	for (size_t i{ 0 }; i < max_nuclides; i++)
@@ -213,21 +194,32 @@ void CNFobject::IDInterestingPeaks()
 		max_lines = psLibrary.at(i).PeakEnergy.size();
 		psLibrary.at(i).PeakSearchResult.resize(max_lines);
 		for (size_t j{ 0 }; j < max_lines; j++)
-		{
-			//lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
 			FindLibraryPeakInData(psLibrary.at(i).PeakEnergy.at(j), energy_tolerance, psLibrary.at(i).NuclideName);
-			//match = ReturnPeakSearchIndex(lib_peak);
-			//psLibrary.at(i).PeakSearchResult.at(j) = match;
-		}
 	}
 }
 
+// ============================================================================================
+// The following section is for generating output
 
+// Output file header construction looks generally like this:
+// [header info supplied by primary routine]
+//                ,                       ,                  ,       , NA - 24,  ,      , CO - 60,   ,
+// Filename       ,      Acquisition start,         Sample ID, % Dead, 1368.63, IT, FWHM,  661.32, IT, FWHM
+// [-------------------------------------] [------------------------] [-------------------//---------------]
+//  Header-Common                           Header-Mode                Header-Nuclide
+//  Line 1: empty                           empty                      nuclide name + empty fields
+//  Line 2: descriptors                     mode-specific descriptors  field descriptors
+//
 std::string CNFobject::ReturnFormattedHeader()
 {
 	output_string.clear();
-	WriteCommonLibraryNuclideData();
-	
+	std::stringstream ss;
+	bool use_descriptors{ true };
+
+	// Write two-line header
+	WriteNuclideHeader(ss, !use_descriptors);
+	WriteNuclideHeader(ss, use_descriptors);
+
 	return output_string;
 }
 
@@ -235,374 +227,188 @@ std::string CNFobject::ReturnFormattedHeader()
 std::string CNFobject::ReturnFormattedLine()
 {  
 	output_string.clear();
-	WriteCommonData();
-	WriteCommonDataType();
-	WriteNuclideData();
-	InsertEndline();
+	std::stringstream ss;
+
+	WriteCommonData(ss);
+	WriteCommonDataType(ss);
+	WriteNuclideData(ss);
+	InsertEndline(ss);
 	return output_string;
 }
 
 
-// ============================================================================================
-
-void CNFobject::WriteCommonData()
+void CNFobject::WriteNuclideHeader(std::stringstream& ss, const bool use_descriptors)
 {
-	std::stringstream ss;
-
-	// TYPE INDEPENDENT COMMON FILE DATA
-	SetStreamParameters(ss, fwf_filename, true);
-	WriteStreamDataStr(ss, ReturnSimpleFilename(), false);
-
-	SetStreamParameters(ss, fwf_acquisition_start, false);
-	WriteStreamDataStr(ss, psData.AcquisitionStart, false);
+	WriteHeaderCommonData(ss, use_descriptors);
+	WriteHeaderModeData(ss, use_descriptors);
+	
+	size_t max_nuclides{ psDataFound.Nuclides.size() };
+	bool last_line{ false };
+	for (size_t i{ 0 }; i < max_nuclides; i++)
+	{
+		if (i == (max_nuclides - 1))
+			last_line = true;
+		WriteHeaderNuclide(ss, i, use_descriptors, last_line);
+	}
+	InsertEndline(ss);
 }
 
 
-void CNFobject::WriteCommonLibraryData()
+void CNFobject::WriteHeaderCommonData(std::stringstream& ss, const bool use_descriptors)
 {
-	std::stringstream ss;
+	std::string filename_to_pass, acquisition_to_pass;
 
-	std::string empty_string("Filename");
-	SetStreamParameters(ss, fwf_filename, true);
-	WriteStreamDataStr(ss, empty_string, false);
+	if (use_descriptors)
+	{
+		filename_to_pass = std::string("Filename");
+		acquisition_to_pass = std::string("Acquisition Start");
+	}
+	else
+	{
+		filename_to_pass = std::string(fwf_filename, ' ');
+		acquisition_to_pass = std::string(fwf_acquisition_start, ' ');
+	}
 
-	empty_string.clear();
-	empty_string = std::string("Acquisition Start");
-	SetStreamParameters(ss, fwf_acquisition_start, false);
-	WriteStreamDataStr(ss, empty_string, false);
-
-
+	WriteCAMFilename(ss, filename_to_pass);
+	WriteCAMAcquisitionTime(ss, acquisition_to_pass);
 }
 
 
-void CNFobject::WriteCommonLibraryData2()
+void CNFobject::WriteHeaderModeData(std::stringstream& ss, const bool use_descriptors)
 {
-	std::stringstream ss;
-
-	std::string empty_string(fwf_filename, ' ');
-	SetStreamParameters(ss, fwf_filename, true);
-	WriteStreamDataStr(ss, empty_string, false);
-
-	empty_string.clear();
-	empty_string = std::string(fwf_acquisition_start, ' ');
-	SetStreamParameters(ss, fwf_acquisition_start, false);
-	WriteStreamDataStr(ss, empty_string, false);
-
-
-}
-
-
-void CNFobject::WriteCommonLibraryTypeData()
-{
-	std::stringstream ss;
-	std::string empty_string;
+	
+	std::string param1_to_pass, param2_to_pass;
 
 	switch (output_option)
 	{
 	case OutputOption::a:
 	case OutputOption::c:
-		empty_string.clear();
-		empty_string = std::string("EReal");
-		SetStreamParameters(ss, fwf_realtime, false);
-		WriteStreamDataStr(ss, empty_string, false);
-
-		empty_string.clear();
-		empty_string = std::string("ELive");
-		SetStreamParameters(ss, fwf_livetime, false);
-		WriteStreamDataStr(ss, empty_string, false);
+		param1_to_pass = (use_descriptors) ? std::string("EReal") : std::string(fwf_realtime, ' ');
+		param2_to_pass = (use_descriptors) ? std::string("ELive") : std::string(fwf_livetime, ' ');
+		WriteCAMRealTime(ss, param1_to_pass);
+		WriteCAMLiveTime(ss, param2_to_pass);
 		break;
 
 	case OutputOption::b:
 	case OutputOption::d:
-		empty_string.clear();
-		empty_string = std::string("Sample ID");
-		SetStreamParameters(ss, fwf_samplie_id, false);
-		WriteStreamDataStr(ss, empty_string, false);
-
-		empty_string.clear();
-		empty_string = std::string("% Dead");
-		SetStreamParameters(ss, fwf_deadtime_pct, false);
-		WriteStreamDataStr(ss, empty_string, false);
+		param1_to_pass = (use_descriptors) ? std::string("Sample ID") : std::string(fwf_sample_id, ' ');
+		param2_to_pass = (use_descriptors) ? std::string("% Dead") : std::string(fwf_deadtime_pct, ' ');
+		WriteCAMSampleID(ss, param1_to_pass);
+		WriteCAMDeadTime(ss, param2_to_pass);
 		break;
 	}
 }
 
 
-void CNFobject::WriteCommonLibraryTypeData2()
+void CNFobject::WriteHeaderNuclide(std::stringstream& ss, const size_t i, const bool use_descriptors, const bool last_line)
 {
-	std::stringstream ss;
-	std::string empty_string;
-
+	std::string param1, param2, param3;
+	size_t max_nuclides{ psDataFound.Nuclides.size() };
+	
+	WritePeakEnergyHeaderValue(ss, i);
 	switch (output_option)
 	{
-	case OutputOption::a:
-	case OutputOption::c:
-		empty_string.clear();
-		empty_string = std::string(fwf_realtime, ' ');
-		SetStreamParameters(ss, fwf_realtime, false);
-		WriteStreamDataStr(ss, empty_string, false);
 
-		empty_string.clear();
-		empty_string = std::string(fwf_livetime, ' ');
-		SetStreamParameters(ss, fwf_livetime, false);
-		WriteStreamDataStr(ss, empty_string, false);
+	case OutputOption::a:
+		param1 = (use_descriptors) ? std::string("IT") : std::string(fwf_iterations, ' ');
+		param2 = (use_descriptors) ? std::string("FWHM") : std::string(fwf_peak_fwhm, ' ');
+		param3 = (use_descriptors) ? std::string("Energy") : std::string(fwf_peak_energy, ' ');
+		WritePeaksearchIterations(ss, param1, false);
+		WritePeakWidth(ss, param2, false);
+		WritePeakEnergy(ss, param3, last_line);
 		break;
 
 	case OutputOption::b:
-	case OutputOption::d:
-		empty_string.clear();
-		empty_string = std::string(fwf_samplie_id, ' ');
-		SetStreamParameters(ss, fwf_samplie_id, false);
-		WriteStreamDataStr(ss, empty_string, false);
-
-		empty_string.clear();
-		empty_string = std::string(fwf_deadtime_pct, ' ');
-		SetStreamParameters(ss, fwf_deadtime_pct, false);
-		WriteStreamDataStr(ss, empty_string, false);
-		break;
-	}
-}
-
-
-void CNFobject::WriteCommonLibraryNuclideData()
-{
-	bool last_file, last_line;
-	bool last_element{ false };
-	size_t max_file{ psLibrary.size() };
-	size_t max_line;
-	std::stringstream ss;
-	std::string empty_string;
-	for (size_t otype{ 0 }; otype < 2; otype++)
-	{
-		last_element = false;
-		if (otype == 0)
-		{
-			WriteCommonLibraryData2();
-			WriteCommonLibraryTypeData2();
-		}
-		else
-		{
-			WriteCommonLibraryData();
-			WriteCommonLibraryTypeData();
-		}
-		
-		for (size_t i{ 0 }; i < max_file; i++)
-		{
-			last_file = ((i + 1) == max_file) ? true : false;
-			max_line = psLibrary.at(i).PeakEnergy.size();
-
-			for (size_t j{ 0 }; j < max_line; j++)
-			{
-				last_line = ((j + 1) == max_line) ? true : false;
-				if (last_file && last_line)
-					last_element = true;
-				if(otype == 0)
-					WriteEmptyNuclideDataType(i, j, last_element);
-				else
-					WriteEmptyNuclideDataType2(i, j, last_element);
-			}
-		}
-		InsertEndline();
-	}
-}
-
-
-void CNFobject::WriteEmptyNuclideDataType(const size_t i, const size_t j, const bool last_element)
-{
-	std::stringstream ss;
-	std::string local_string;
-
-	switch (output_option)
-	{
-	case OutputOption::a:
-		// Nuclide data: peak area, iterations, FWHM, energy
-		local_string = psLibrary.at(i).NuclideName;
-		SetStreamParameters(ss, fwf_peak_area, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_iterations, ' ');
-		SetStreamParameters(ss, fwf_iterations, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_fwhm, ' ');
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_energy, ' ');
-		SetStreamParameters(ss, fwf_peak_energy, false);
-		WriteStreamDataStr(ss, local_string, last_element);
-		break;
-
-	case OutputOption::b:
-		// Nulcide data: peak area, FWHM
-		local_string = psLibrary.at(i).NuclideName;
-		SetStreamParameters(ss, fwf_peak_area, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_fwhm, ' ');
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, last_element);
+		param1 = (use_descriptors) ? std::string("FWHM") : std::string(fwf_peak_fwhm, ' ');
+		WritePeakWidth(ss, param1, last_line);
 		break;
 
 	case OutputOption::c:
-		// Nuclide data: peak area, error (%), FWHM, peak energy
-		local_string = psLibrary.at(i).NuclideName;
-		SetStreamParameters(ss, fwf_peak_area, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_error, ' ');
-		SetStreamParameters(ss, fwf_peak_error, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_fwhm, ' ');
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_energy, ' ');
-		SetStreamParameters(ss, fwf_peak_energy, false);
-		WriteStreamDataStr(ss, local_string, last_element);
+		param1 = (use_descriptors) ? std::string("%Err") : std::string(fwf_peak_error, ' ');
+		param2 = (use_descriptors) ? std::string("FWHM") : std::string(fwf_peak_fwhm, ' ');
+		param3 = (use_descriptors) ? std::string("Energy") : std::string(fwf_peak_energy, ' ');
+		WritePeakError(ss, param1, false);
+		WritePeakWidth(ss, param2, false);
+		WritePeakEnergy(ss, param3, last_line);
 		break;
 
 	case OutputOption::d:
-		// Nuclide data: peak area, FWHM, error (%)
-		local_string = psLibrary.at(i).NuclideName;
-		SetStreamParameters(ss, fwf_peak_area, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_fwhm, ' ');
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, false);
-		local_string = std::string(fwf_peak_error, ' ');
-		SetStreamParameters(ss, fwf_peak_error, false);
-		WriteStreamDataStr(ss, local_string, last_element);
+		param1 = (use_descriptors) ? std::string("FWHM") : std::string(fwf_peak_fwhm, ' ');
+		param2 = (use_descriptors) ? std::string("%Err") : std::string(fwf_peak_error, ' ');
+		WritePeakWidth(ss, param1, false);
+		WritePeakError(ss, param2, last_line);
 		break;
 	}
 }
 
 
-void CNFobject::WriteEmptyNuclideDataType2(const size_t i, const size_t j, const bool last_element)
+
+void CNFobject::WriteCommonData(std::stringstream& ss)
 {
-	std::stringstream ss;
-	std::string local_string;
-
-	switch (output_option)
-	{
-	case OutputOption::a:
-		// Nuclide data: peak area, iterations, FWHM, energy
-		//local_string = std::to_string(psLibrary.at(i).PeakEnergy.at(j));
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_energy);
-		WriteStreamData(ss, psLibrary.at(i).PeakEnergy.at(j), false);
-		ss << std::right; 
-		local_string = "IT";
-		SetStreamParameters(ss, fwf_iterations, false);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right; 
-		local_string = "FWHM";
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right; 
-		local_string = "Energy";
-		SetStreamParameters(ss, fwf_peak_energy, false);
-		WriteStreamDataStr(ss, local_string, last_element);
-		break;
-
-	case OutputOption::b:
-		// Nulcide data: peak area, FWHM
-		local_string = std::to_string(psLibrary.at(i).PeakEnergy.at(j));
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right;
-		local_string = "FWHM";
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, last_element);
-		break;
-
-	case OutputOption::c:
-		// Nuclide data: peak area, error (%), FWHM, peak energy
-		local_string = std::to_string(psLibrary.at(i).PeakEnergy.at(j));
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right;
-		local_string = "%Err";
-		SetStreamParameters(ss, fwf_peak_error, false);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right;
-		local_string = "FWHM";
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right;
-		local_string = "Energy";
-		SetStreamParameters(ss, fwf_peak_energy, false);
-		WriteStreamDataStr(ss, local_string, last_element);
-		break;
-
-	case OutputOption::d:
-		// Nuclide data: peak area, FWHM, error (%)
-		local_string = std::to_string(psLibrary.at(i).PeakEnergy.at(j));
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right;
-		local_string = "FWHM";
-		SetStreamParameters(ss, fwf_peak_fwhm, false);
-		WriteStreamDataStr(ss, local_string, false);
-		ss << std::right;
-		local_string = "%Err";
-		SetStreamParameters(ss, fwf_peak_error, false);
-		WriteStreamDataStr(ss, local_string, last_element);
-		break;
-	}
+	WriteCAMFilename(ss);
+	WriteCAMAcquisitionTime(ss);
 }
-
-
-void CNFobject::WriteCommonDataType()
-{
-	std::stringstream ss;
-
-	switch (output_option)
-	{
-	case OutputOption::a:
-	case OutputOption::c:
-		SetStreamParameters(ss, fwf_realtime, fwf_precision_time);
-		WriteStreamData(ss, psData.RealTime, false);
-		
-		SetStreamParameters(ss, fwf_livetime, fwf_precision_time);
-		WriteStreamData(ss, psData.LiveTime, false);
-		break;
-
-	case OutputOption::b:
-	case OutputOption::d:
-		SetStreamParameters(ss, fwf_samplie_id, true);
-		WriteStreamData(ss, psData.SampleID, false);
-		
-		SetStreamParameters(ss, fwf_deadtime_pct, fwf_precision_time);
-		WriteStreamData(ss, psData.DeadTimePct, false);
-		break;
-	}
-}
-
 /*
-void CNFobject::WriteNuclideData()
+void CNFobject::WriteEmptyNuclideDataType(std::stringstream& ss, const size_t i, const bool last_element)
 {
-	bool last_file, last_line;
-	bool last_element{ false };
-	size_t max_file{ psLibrary.size() };
-	size_t max_line;
-	size_t max_peaks{ psData.Nuclides.size() };
-	std::stringstream ss;
-	int use_nuclide;
+//	std::stringstream ss;
+	std::string local_string;
 
-	for (size_t i{ 0 }; i < max_file; i++)
+	switch (output_option)
 	{
-		last_file = ((i + 1) == max_file) ? true : false;
-		max_line = psLibrary.at(i).PeakEnergy.size();
-		for (size_t j{ 0 }; j < max_line; j++)
-		{
-			last_line = ((j + 1) == max_line) ? true : false;
-			if (last_file && last_line)
-				last_element = true;
-			use_nuclide = psLibrary.at(i).PeakSearchResult.at(j);
-			WriteNuclideDataType(use_nuclide, last_element);
-		}
+	case OutputOption::a:
+		// Nuclide data: peak area, iterations, FWHM, energy
+		WritePeakEnergyHeaderValue(ss, i);
+		WritePeaksearchIterations(ss, std::string("IT"), false);
+		WritePeakWidth(ss, std::string("FWHM"), false);
+		WritePeakEnergy(ss, std::string("Energy"), last_element);
+		break;
 
+	case OutputOption::b:
+		// Nulcide data: peak area, FWHM
+		WritePeakEnergyHeaderValue(ss, i);
+		WritePeakWidth(ss, std::string("FWHM"), last_element);
+		break;
+
+	case OutputOption::c:
+		// Nuclide data: peak area, error (%), FWHM, peak energy
+		WritePeakEnergyHeaderValue(ss, i);
+		WritePeakError(ss, std::string("%Err"), false);
+		WritePeakWidth(ss, std::string("FWHM"), false);
+		WritePeakEnergy(ss, std::string("Energy"), last_element);
+		break;
+
+	case OutputOption::d:
+		// Nuclide data: peak area, FWHM, error (%)
+		WritePeakEnergyHeaderValue(ss, i);
+		WritePeakWidth(ss, std::string("FWHM"), false);
+		WritePeakError(ss, std::string("%Err"), last_element);
+		break;
 	}
 }
 */
 
-void CNFobject::WriteNuclideData()
+void CNFobject::WriteCommonDataType(std::stringstream& ss)
 {
-	std::stringstream ss;
+	switch (output_option)
+	{
+	case OutputOption::a:
+	case OutputOption::c:
+		WriteCAMRealTime(ss);
+		WriteCAMLiveTime(ss);
+		break;
+
+	case OutputOption::b:
+	case OutputOption::d:
+		WriteCAMSampleID(ss);
+		WriteCAMDeadTime(ss);
+		break;
+	}
+}
+
+
+void CNFobject::WriteNuclideData(std::stringstream& ss)
+{
 	bool last_element{ false };
 	size_t max_nuclides{ psDataFound.Nuclides.size() };
 	for (size_t i{ 0 }; i < max_nuclides; i++)
@@ -653,10 +459,45 @@ void CNFobject::WritePeakArea(std::stringstream& ss, const size_t i, const bool 
 }
 
 
+void CNFobject::WritePeakArea(std::stringstream& ss, const std::string user_string, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
+	WriteStreamData(ss, user_string, final_element);
+}
+
+
+void CNFobject::WritePeakArea(std::stringstream& ss, bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
+	WriteStreamData(ss, std::string(fwf_peak_area, ' '), final_element);
+}
+
+
 void CNFobject::WritePeakEnergy(std::stringstream& ss, const size_t i, const bool final_element)
 {
 	SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
 	WriteStreamData(ss, psDataFound.Nuclides.at(i).Energy, final_element);
+}
+
+
+void CNFobject::WritePeakEnergy(std::stringstream& ss, const std::string user_string, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
+	WriteStreamData(ss, user_string, final_element);
+}
+
+
+void CNFobject::WritePeakEnergy(std::stringstream& ss, bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
+	WriteStreamData(ss, std::string(fwf_peak_energy, ' '), final_element);
+}
+
+
+void CNFobject::WritePeakEnergyHeaderValue(std::stringstream& ss, const size_t i)
+{
+	SetStreamParameters(ss, fwf_peak_area, fwf_precision_energy);
+	WriteStreamData(ss, psDataFound.Nuclides.at(i).IdealEnergy, false);
 }
 
 
@@ -667,10 +508,38 @@ void CNFobject::WritePeakError(std::stringstream& ss, const size_t i, const bool
 }
 
 
+void CNFobject::WritePeakError(std::stringstream& ss, const std::string user_string, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
+	WriteStreamData(ss, user_string, final_element);
+}
+
+
+void CNFobject::WritePeakError(std::stringstream& ss, bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
+	WriteStreamData(ss, std::string(fwf_peak_error, ' '), final_element);
+}
+
+
 void CNFobject::WritePeakWidth(std::stringstream& ss, const size_t i, const bool final_element)
 {
 	SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
 	WriteStreamData(ss, psDataFound.Nuclides.at(i).FWHM, final_element);
+}
+
+
+void CNFobject::WritePeakWidth(std::stringstream& ss, const std::string user_string, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
+	WriteStreamData(ss, user_string, final_element);
+}
+
+
+void CNFobject::WritePeakWidth(std::stringstream& ss, bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
+	WriteStreamData(ss, std::string(fwf_peak_fwhm, ' '), final_element);
 }
 
 
@@ -680,71 +549,103 @@ void CNFobject::WritePeaksearchIterations(std::stringstream& ss, const size_t i,
 	WriteStreamData(ss, psDataFound.Nuclides.at(i).Iterations, final_element);
 }
 
-/*
-void CNFobject::WriteNuclideDataType(const int line, const bool final_element)
+
+void CNFobject::WritePeaksearchIterations(std::stringstream& ss, const std::string user_string, bool final_element)
 {
-	std::stringstream ss;
-	DataStructure::DataStruct data;
-	size_t lline;
-
-	if (line >= 0)
-	{
-		data = psData;
-		lline = line;
-	}
-	else
-	{
-		data = MakeBlank();
-		lline = 0;
-	}
-
-	switch (output_option)
-	{
-	case OutputOption::a:
-		// Nuclide data: peak area, iterations, FWHM, energy
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
-		SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
-		WriteStreamData(ss, data.Nuclides.at(lline).Iterations, false);
-		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, false);
-		SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
-		WriteStreamData(ss, data.Nuclides.at(lline).Energy, final_element);
-		break;
-
-	case OutputOption::b:
-		// Nulcide data: peak area, FWHM
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
-		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, final_element);
-		break;
-
-	case OutputOption::c:
-		// Nuclide data: peak area, error (%), FWHM, peak energy
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
-		SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
-		WriteStreamData(ss, data.Nuclides.at(lline).Error, false);
-		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, false);
-		SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
-		WriteStreamData(ss, data.Nuclides.at(lline).Energy, false);
-		break;
-
-	case OutputOption::d:
-		// Nuclide data: peak area, FWHM, error (%)
-		SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
-		WriteStreamData(ss, data.Nuclides.at(lline).Area, false);
-		SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
-		WriteStreamData(ss, data.Nuclides.at(lline).FWHM, false);
-		SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
-		WriteStreamData(ss, data.Nuclides.at(lline).Error, false);
-		break;
-	}
+	SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
+	WriteStreamData(ss, user_string, final_element);
 }
 
-*/
+
+void CNFobject::WritePeaksearchIterations(std::stringstream& ss, bool final_element)
+{
+	SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
+	WriteStreamData(ss, std::string(fwf_iterations, ' '), final_element);
+}
+
+
+void CNFobject::WriteCAMFilename(std::stringstream& ss)
+{
+	SetStreamParameters(ss, fwf_filename, true);
+	WriteStreamDataStr(ss, ReturnSimpleFilename(), false);
+}
+
+
+void CNFobject::WriteCAMFilename(std::stringstream& ss, std::string user_string)
+{
+	SetStreamParameters(ss, fwf_filename, true);
+	WriteStreamDataStr(ss, user_string, false);
+}
+
+
+void CNFobject::WriteCAMAcquisitionTime(std::stringstream& ss)
+{
+	SetStreamParameters(ss, fwf_acquisition_start, false);
+	WriteStreamDataStr(ss, psData.AcquisitionStart, false);
+}
+
+
+void CNFobject::WriteCAMAcquisitionTime(std::stringstream& ss, std::string user_string)
+{
+	SetStreamParameters(ss, fwf_acquisition_start, false);
+	WriteStreamDataStr(ss, user_string, false);
+}
+
+
+void CNFobject::WriteCAMRealTime(std::stringstream& ss)
+{
+	SetStreamParameters(ss, fwf_realtime, fwf_precision_time);
+	WriteStreamData(ss, psData.RealTime, false);
+}
+
+
+void CNFobject::WriteCAMRealTime(std::stringstream& ss, std::string user_string)
+{
+	SetStreamParameters(ss, fwf_realtime, fwf_precision_time);
+	WriteStreamData(ss, user_string, false);
+}
+
+
+void CNFobject::WriteCAMLiveTime(std::stringstream& ss)
+{
+	SetStreamParameters(ss, fwf_livetime, fwf_precision_time);
+	WriteStreamData(ss, psData.LiveTime, false);
+}
+
+
+void CNFobject::WriteCAMLiveTime(std::stringstream& ss, std::string user_string)
+{
+	SetStreamParameters(ss, fwf_livetime, fwf_precision_time);
+	WriteStreamData(ss, user_string, false);
+}
+
+
+void CNFobject::WriteCAMDeadTime(std::stringstream& ss)
+{
+	SetStreamParameters(ss, fwf_deadtime_pct, fwf_precision_time);
+	WriteStreamData(ss, psData.DeadTimePct, false);
+}
+
+
+void CNFobject::WriteCAMDeadTime(std::stringstream& ss, std::string user_string)
+{
+	SetStreamParameters(ss, fwf_deadtime_pct, fwf_precision_time);
+	WriteStreamData(ss, user_string, false);
+}
+
+
+void CNFobject::WriteCAMSampleID(std::stringstream& ss)
+{
+	SetStreamParameters(ss, fwf_sample_id, true);
+	WriteStreamDataStr(ss, psData.SampleID , false);
+}
+
+
+void CNFobject::WriteCAMSampleID(std::stringstream& ss, std::string user_string)
+{
+	SetStreamParameters(ss, fwf_sample_id, true);
+	WriteStreamDataStr(ss, user_string, false);
+}
 
 
 void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align)
@@ -794,25 +695,10 @@ std::string CNFobject::ReturnSimpleFilename()
 }
 
 
-void CNFobject::InsertEndline()
+void CNFobject::InsertEndline(std::stringstream& ss)
 {
-	std::stringstream ss;
 	ss << std::endl;
 	output_string.append(ss.str());
-}
-
-
-DataStructure::DataStruct CNFobject::MakeBlank()
-{
-	DataStructure::DataStruct return_value;
-	return_value.Nuclides.resize(1);
-	return_value.Nuclides.at(0).Area = static_cast<FLOAT>(0.0);
-	return_value.Nuclides.at(0).Energy = static_cast<FLOAT>(0.0);
-	return_value.Nuclides.at(0).Error = static_cast<FLOAT>(0.0);
-	return_value.Nuclides.at(0).FWHM = static_cast<FLOAT>(0.0);
-	return_value.Nuclides.at(0).Iterations = static_cast<LONG>(0.0);
-	return_value.Nuclides.at(0).Rate = static_cast<FLOAT>(0.0);
-	return return_value;
 }
 
 
@@ -849,4 +735,18 @@ void CNFobject::FindLibraryPeakInData(const FLOAT centroid, const FLOAT toleranc
 		NoData.Nuclides.at(0).IdealEnergy = centroid;
 		psDataFound.Nuclides.push_back(NoData.Nuclides.at(0));
 	}
+}
+
+
+DataStructure::DataStruct CNFobject::MakeBlank()
+{
+	DataStructure::DataStruct return_value;
+	return_value.Nuclides.resize(1);
+	return_value.Nuclides.at(0).Area = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).Energy = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).Error = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).FWHM = static_cast<FLOAT>(0.0);
+	return_value.Nuclides.at(0).Iterations = static_cast<LONG>(0.0);
+	return_value.Nuclides.at(0).Rate = static_cast<FLOAT>(0.0);
+	return return_value;
 }

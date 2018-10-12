@@ -43,7 +43,7 @@ static constexpr size_t fwf_filename = 30;
 static constexpr size_t fwf_acquisition_start = 20;
 static constexpr size_t fwf_realtime = 8;
 static constexpr size_t fwf_livetime = 8;
-static constexpr size_t fwf_samplie_id = 16;
+static constexpr size_t fwf_sample_id = 16;
 static constexpr size_t fwf_deadtime_pct = 6;
 
 // Output file fixed width field lengths: nuclide specific fields

@@ -45,25 +45,32 @@ private:
 	void ResizeDataStructure();
 	void PopulateHeaderStructure();
 	void PopulateNuclideData();
-	void PushEnergyToleranceToFile();
-	void PushNIDLibraryToFile();
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
 
 	void FindLibraryPeakInData(const FLOAT centroid, const FLOAT tolerance, const std::string nuclide_name);
 
+	// Header file generating functions
+	void WriteNuclideHeader(std::stringstream& ss, const bool use_descriptors);
+	void WriteHeaderCommonData(std::stringstream& ss, const bool use_descriptors);
+	void WriteHeaderModeData(std::stringstream& ss, const bool use_descriptors);
+	void WriteHeaderNuclide(std::stringstream& ss, const size_t i, const bool use_descriptors, const bool last_line);
 
-	void WriteCommonData();
-	void WriteCommonLibraryData();
-	void WriteCommonLibraryData2();
-	void WriteCommonLibraryTypeData();
-	void WriteCommonLibraryTypeData2();
-	void WriteCommonLibraryNuclideData();
-	void WriteEmptyNuclideDataType(const size_t i, const size_t j, const bool last_element);
-	void WriteEmptyNuclideDataType2(const size_t i, const size_t j, const bool last_element);
-	void InsertEndline();
-	void WriteCommonDataType();
-	void WriteNuclideData();
+
+
+	void WriteCommonData(std::stringstream& ss);
+
+	
+	
+	//void WriteCommonLibraryNuclideData(std::stringstream& ss);
+
+	void WriteEmptyNuclideDataType(std::stringstream& ss, const size_t i, const bool last_element);
+	
+
+	//void WriteEmptyNuclideDataType2(const size_t i, const size_t j, const bool last_element);
+	void InsertEndline(std::stringstream& ss);
+	void WriteCommonDataType(std::stringstream& ss);
+	void WriteNuclideData(std::stringstream& ss);
 	void WriteNuclideDataType(std::stringstream& ss, const size_t i, const bool final_element);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
@@ -75,10 +82,38 @@ private:
 
 	// Formatted output generators
 	void WritePeakArea(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeakArea(std::stringstream& ss, const std::string user_string, const bool last_element);
+	void WritePeakArea(std::stringstream& ss, bool last_element);
+	
 	void WritePeaksearchIterations(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeaksearchIterations(std::stringstream& ss, const std::string user_string, const bool last_element);
+	void WritePeaksearchIterations(std::stringstream& ss, bool last_element);
+	
 	void WritePeakWidth(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeakWidth(std::stringstream& ss, const std::string user_string, const bool last_element);
+	void WritePeakWidth(std::stringstream& ss, bool last_element);
+	
 	void WritePeakEnergy(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeakEnergy(std::stringstream& ss, const std::string user_string, const bool last_element);
+	void WritePeakEnergy(std::stringstream& ss, bool last_element); 
+	void WritePeakEnergyHeaderValue(std::stringstream& ss, const size_t i);
+	
 	void WritePeakError(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeakError(std::stringstream& ss, const std::string user_string, const bool last_element);
+	void WritePeakError(std::stringstream& ss, bool last_element);
+	
+	void WriteCAMFilename(std::stringstream& ss);
+	void WriteCAMFilename(std::stringstream& ss, std::string user_string);
+	void WriteCAMAcquisitionTime(std::stringstream& ss);
+	void WriteCAMAcquisitionTime(std::stringstream& ss, std::string user_string);
+	void WriteCAMRealTime(std::stringstream& ss);
+	void WriteCAMRealTime(std::stringstream& ss, std::string user_string);
+	void WriteCAMLiveTime(std::stringstream& ss);
+	void WriteCAMLiveTime(std::stringstream& ss, std::string user_string);
+	void WriteCAMDeadTime(std::stringstream& ss);
+	void WriteCAMDeadTime(std::stringstream& ss, std::string user_string);
+	void WriteCAMSampleID(std::stringstream& ss);
+	void WriteCAMSampleID(std::stringstream& ss, std::string user_string);
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
