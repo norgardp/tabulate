@@ -101,4 +101,5 @@ private:
 public:
 	CEdit OutputFilename;
 	afx_msg void OnEnKillfocusEdtFilename();
+	CButton AnalyzeButton;
 };

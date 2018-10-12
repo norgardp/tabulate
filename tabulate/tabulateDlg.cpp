@@ -72,6 +72,7 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHK_OVERWRITE, OverwriteMode);
 	DDX_Radio(pDX, IDC_RADIO_OPTA, (int&)OutputOptionRB);
 	DDX_Control(pDX, IDC_EDT_FILENAME, OutputFilename);
+	DDX_Control(pDX, IDOK, AnalyzeButton);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -482,12 +483,11 @@ void CtabulateDlg::OnBnClickedOk()
 	DataStructure::InitializationOptions options;
 	options = ObtainInitializationOptions();
 	
+	AnalyzeButton.EnableWindow(FALSE);
+	AnalyzeButton.SetWindowTextW(_T("Running"));
 	if (output_file_status)
 	{
-		// Prepare output file for data
 		std::ofstream myFile(OpenFileForOutput());
-		
-		// Write header data
 		myFile << ReturnHeaderData(DatFiles.front(), DatFiles.back());
 		
 		int sizeola(DatFiles.size());
@@ -501,6 +501,8 @@ void CtabulateDlg::OnBnClickedOk()
 		}
 
 		myFile.close();
+		AnalyzeButton.SetWindowTextW(_T("Analyze"));
+		AnalyzeButton.EnableWindow(TRUE);
 	}
 }
 
