@@ -215,8 +215,9 @@ void CNFobject::IDInterestingPeaks()
 		for (size_t j{ 0 }; j < max_lines; j++)
 		{
 			lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
-			match = ReturnPeakSearchIndex(lib_peak);
-			psLibrary.at(i).PeakSearchResult.at(j) = match;
+			FindLibraryPeakInData(psLibrary.at(i).PeakEnergy.at(j), energy_tolerance, psLibrary.at(i).NuclideName);
+			//match = ReturnPeakSearchIndex(lib_peak);
+			//psLibrary.at(i).PeakSearchResult.at(j) = match;
 		}
 	}
 }
@@ -728,4 +729,39 @@ DataStructure::DataStruct CNFobject::MakeBlank()
 	return_value.Nuclides.at(0).Iterations = static_cast<LONG>(0.0);
 	return_value.Nuclides.at(0).Rate = static_cast<FLOAT>(0.0);
 	return return_value;
+}
+
+
+void CNFobject::FindLibraryPeakInData(const FLOAT centroid, const FLOAT tolerance,
+	std::string nuclide_name)
+{
+	FLOAT hilimit{ centroid + tolerance / 2 };
+	FLOAT lolimit{ centroid - tolerance / 2 };
+	size_t total_found_peaks{ psData.Nuclides.size() };
+	bool peak_was_not_found{ true };
+
+	for (size_t i{ 0 }; i < total_found_peaks; i++)
+	{
+		FLOAT peak_energy{ psData.Nuclides.at(i).Energy };
+		if ((peak_energy > lolimit) && (peak_energy < hilimit))
+		{
+			// peak was found
+			peak_was_not_found = false;
+			psDataFound.Nuclides.push_back(psData.Nuclides.at(i));
+			psData.Nuclides.erase(psData.Nuclides.begin() + i);
+			total_found_peaks--;
+			i--;
+			size_t current_iterator = psDataFound.Nuclides.size() - 1;
+			psDataFound.Nuclides.at(current_iterator).NucName = nuclide_name;
+			psDataFound.Nuclides.at(current_iterator).IdealEnergy = centroid;
+			break;
+		}
+	}
+	if (fwf_peak_area)
+	{
+		NoData = MakeBlank();
+		NoData.Nuclides.at(0).NucName = nuclide_name;
+		NoData.Nuclides.at(0).IdealEnergy = centroid;
+		psDataFound.Nuclides.push_back(NoData.Nuclides.at(0));
+	}
 }

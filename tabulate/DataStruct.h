@@ -17,11 +17,13 @@ namespace DataStructure
 		struct NuclideStruct
 		{
 			FLOAT Energy;		// CAM_F_PSENERGY
-			FLOAT Area;		// CAM_F_PSAREA
-			FLOAT FWHM;		// CAM_F_PSFWHM
+			FLOAT Area;			// CAM_F_PSAREA
+			FLOAT FWHM;			// CAM_F_PSFWHM
 			LONG Iterations;	// CAM_L_PSITER
-			FLOAT Rate;		// CAM_F_PSCTSS
+			FLOAT Rate;			// CAM_F_PSCTSS
 			FLOAT Error;		// CAM_F_PSCERR
+			std::string NucName;// from LibraryStruct
+			FLOAT IdealEnergy;	// frmo LibratyStruct
 		};
 	}
 

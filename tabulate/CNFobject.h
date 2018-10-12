@@ -50,6 +50,8 @@ private:
 	DataStructure::NuclideStructure::NuclideStruct ReturnNuclideInformation(const USHORT i);
 	void IDInterestingPeaks();
 
+	void FindLibraryPeakInData(const FLOAT centroid, const FLOAT tolerance, const std::string nuclide_name);
+
 
 	void WriteCommonData();
 	void WriteCommonLibraryData();
@@ -80,6 +82,8 @@ private:
 	double energy_tolerance;
 
 	DataStructure::DataStruct psData;
+	DataStructure::DataStruct psDataFound;
+	DataStructure::DataStruct NoData;
 	std::vector<LibraryStruct> psLibrary;
 	SHORT start_step{ 0 };
 	LibraryDimension libDim;
