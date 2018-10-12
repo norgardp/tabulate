@@ -202,10 +202,10 @@ void CNFobject::IDInterestingPeaks()
 // energy and user supplied search tolerance. If a peak is found in data, then
 // emplace the peak index into the psLibrary.PeakSearchResult vector.
 {
-	SHORT match;
-	OjEnergy_T lib_peak;
+	//SHORT match;
+	//OjEnergy_T lib_peak;
 
-	lib_peak.rToler = static_cast<float>(energy_tolerance);
+	//lib_peak.rToler = static_cast<float>(energy_tolerance);
 	size_t max_nuclides{ psLibrary.size() };
 	size_t max_lines;
 	for (size_t i{ 0 }; i < max_nuclides; i++)
@@ -214,7 +214,7 @@ void CNFobject::IDInterestingPeaks()
 		psLibrary.at(i).PeakSearchResult.resize(max_lines);
 		for (size_t j{ 0 }; j < max_lines; j++)
 		{
-			lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
+			//lib_peak.rEnergy = psLibrary.at(i).PeakEnergy.at(j);
 			FindLibraryPeakInData(psLibrary.at(i).PeakEnergy.at(j), energy_tolerance, psLibrary.at(i).NuclideName);
 			//match = ReturnPeakSearchIndex(lib_peak);
 			//psLibrary.at(i).PeakSearchResult.at(j) = match;
@@ -572,7 +572,7 @@ void CNFobject::WriteCommonDataType()
 	}
 }
 
-
+/*
 void CNFobject::WriteNuclideData()
 {
 	bool last_file, last_line;
@@ -598,7 +598,89 @@ void CNFobject::WriteNuclideData()
 
 	}
 }
+*/
 
+void CNFobject::WriteNuclideData()
+{
+	std::stringstream ss;
+	bool last_element{ false };
+	size_t max_nuclides{ psDataFound.Nuclides.size() };
+	for (size_t i{ 0 }; i < max_nuclides; i++)
+	{
+		if (i == (max_nuclides - 1))
+			last_element = true;
+		WriteNuclideDataType(ss, i, last_element);
+	}
+}
+
+
+void CNFobject::WriteNuclideDataType(std::stringstream& ss, const size_t i, const bool final_element)
+{
+	switch (output_option)
+	{
+	case OutputOption::a:
+		WritePeakArea(ss, i, false);
+		WritePeaksearchIterations(ss, i, false);
+		WritePeakWidth(ss, i, false);
+		WritePeakEnergy(ss, i, final_element);
+		break;
+
+	case OutputOption::b:
+		WritePeakArea(ss, i, false);
+		WritePeakWidth(ss, i, final_element);
+		break;
+
+	case OutputOption::c:
+		WritePeakArea(ss, i, false);
+		WritePeakError(ss, i, false);
+		WritePeakWidth(ss, i, false);
+		WritePeakEnergy(ss, i, final_element);
+		break;
+
+	case OutputOption::d:
+		WritePeakArea(ss, i, false);
+		WritePeakWidth(ss, i, false);
+		WritePeakError(ss, i, final_element);
+		break;
+	}
+}
+
+
+void CNFobject::WritePeakArea(std::stringstream& ss, const size_t i, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_area, fwf_precision_area);
+	WriteStreamData(ss, psDataFound.Nuclides.at(i).Area, final_element);
+}
+
+
+void CNFobject::WritePeakEnergy(std::stringstream& ss, const size_t i, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_energy, fwf_precision_energy);
+	WriteStreamData(ss, psDataFound.Nuclides.at(i).Energy, final_element);
+}
+
+
+void CNFobject::WritePeakError(std::stringstream& ss, const size_t i, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_error, fwf_precision_error);
+	WriteStreamData(ss, psDataFound.Nuclides.at(i).Error, final_element);
+}
+
+
+void CNFobject::WritePeakWidth(std::stringstream& ss, const size_t i, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_peak_fwhm, fwf_precision_npa);
+	WriteStreamData(ss, psDataFound.Nuclides.at(i).FWHM, final_element);
+}
+
+
+void CNFobject::WritePeaksearchIterations(std::stringstream& ss, const size_t i, const bool final_element)
+{
+	SetStreamParameters(ss, fwf_iterations, fwf_precision_iterations);
+	WriteStreamData(ss, psDataFound.Nuclides.at(i).Iterations, final_element);
+}
+
+/*
 void CNFobject::WriteNuclideDataType(const int line, const bool final_element)
 {
 	std::stringstream ss;
@@ -661,6 +743,8 @@ void CNFobject::WriteNuclideDataType(const int line, const bool final_element)
 		break;
 	}
 }
+
+*/
 
 
 void CNFobject::SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align)
@@ -757,7 +841,8 @@ void CNFobject::FindLibraryPeakInData(const FLOAT centroid, const FLOAT toleranc
 			break;
 		}
 	}
-	if (fwf_peak_area)
+
+	if (peak_was_not_found)
 	{
 		NoData = MakeBlank();
 		NoData.Nuclides.at(0).NucName = nuclide_name;

@@ -64,7 +64,7 @@ private:
 	void InsertEndline();
 	void WriteCommonDataType();
 	void WriteNuclideData();
-	void WriteNuclideDataType(const int line, const bool final_element);
+	void WriteNuclideDataType(std::stringstream& ss, const size_t i, const bool final_element);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const bool left_align);
 	void SetStreamParameters(std::stringstream& ss, const size_t field_width, const size_t precision); 
 	void WriteStreamDataStr(std::stringstream& ss, std::string& the_string, const bool last);
@@ -72,6 +72,13 @@ private:
 	void WriteStreamData(std::stringstream& ss, T& param, const bool last);
 	std::string ReturnSimpleFilename();
 	DataStructure::DataStruct MakeBlank();
+
+	// Formatted output generators
+	void WritePeakArea(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeaksearchIterations(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeakWidth(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeakEnergy(std::stringstream& ss, const size_t i, const bool last_element);
+	void WritePeakError(std::stringstream& ss, const size_t i, const bool last_element);
 
 private:
 	CanberraSequenceAnalyzerLib::ISequenceAnalyzerPtr pSequenceAnalyzer;
