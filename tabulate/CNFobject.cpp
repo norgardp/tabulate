@@ -203,6 +203,7 @@ void CNFobject::IDInterestingPeaks()
 {
 	size_t max_nuclides{ psLibrary.size() };
 	size_t max_lines;
+	FLOAT tolerance{ static_cast<FLOAT>(energy_tolerance) };
 	for (size_t i{ 0 }; i < max_nuclides; i++)
 	{
 		max_lines = psLibrary.at(i).PeakEnergy.size();
