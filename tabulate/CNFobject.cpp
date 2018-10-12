@@ -209,7 +209,7 @@ void CNFobject::IDInterestingPeaks()
 		max_lines = psLibrary.at(i).PeakEnergy.size();
 		psLibrary.at(i).PeakSearchResult.resize(max_lines);
 		for (size_t j{ 0 }; j < max_lines; j++)
-			FindLibraryPeakInData(psLibrary.at(i).PeakEnergy.at(j), energy_tolerance, psLibrary.at(i).NuclideName);
+			FindLibraryPeakInData(psLibrary.at(i).PeakEnergy.at(j), tolerance, psLibrary.at(i).NuclideName);
 	}
 }
 
