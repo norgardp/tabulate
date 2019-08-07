@@ -341,10 +341,21 @@ void CtabulateDlg::OnBnClickedBtnFileinsert()
 // and multiple selections are permitted during any individual attempt.
 {
 	CString path;
+	
+	CString filename;
+	wchar_t* p = filename.GetBuffer(FILE_LIST_BUFFER_SIZE);
+	CFileDialog dlg(TRUE);
+	OPENFILENAME& ofn = dlg.GetOFN();
+	ofn.Flags |= OFN_HIDEREADONLY;
+	ofn.Flags |= OFN_OVERWRITEPROMPT;
+	ofn.Flags |= OFN_ALLOWMULTISELECT;
+	ofn.lpstrFile = p;
+	ofn.nMaxFile = FILE_LIST_BUFFER_SIZE;
+	ofn.lpstrFilter = default_configuration_filter;
 
-	CFileDialog dlg(TRUE, default_data_extension, NULL, 
-		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_ALLOWMULTISELECT, 
-		default_configuration_filter, NULL, 0, TRUE);
+	//CFileDialog dlg(TRUE, default_data_extension, NULL, 
+	//	OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_ALLOWMULTISELECT, 
+	//	default_configuration_filter, NULL, 0, TRUE);
 
 	if(dlg.DoModal() == IDOK)
 	{
@@ -358,6 +369,8 @@ void CtabulateDlg::OnBnClickedBtnFileinsert()
 		}
 		PopulateListBoxItems(&DataFileListing, &DatFiles);
 	}
+	filename.ReleaseBuffer();
+	path.ReleaseBuffer();
 }
 
 

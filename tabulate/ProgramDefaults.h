@@ -3,6 +3,8 @@
 
 #define GENIE_MAX_PATH 250
 #define GENIE_MAX_DELETE 20
+#define MAX_CFileDialog_FILE_COUNT 99
+#define FILE_LIST_BUFFER_SIZE ((MAX_CFileDialog_FILE_COUNT*(MAX_PATH+1))+1)
 
 // Peak search energy tolerance acceptable limits
 #define GENIE_MAX_ETOL 5.0
