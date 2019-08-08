@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #define GENIE_MAX_PATH 250
-#define GENIE_MAX_DELETE 20
+#define GENIE_MAX_DELETE 200
 #define MAX_CFileDialog_FILE_COUNT 99
 #define FILE_LIST_BUFFER_SIZE ((MAX_CFileDialog_FILE_COUNT*(MAX_PATH+1))+1)
 
