@@ -102,4 +102,6 @@ public:
 	CEdit OutputFilename;
 	afx_msg void OnEnKillfocusEdtFilename();
 	CButton AnalyzeButton;
+private:
+	void SetListboxColumnWidth(CListBox* listbox);
 };

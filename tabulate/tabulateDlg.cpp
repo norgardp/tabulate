@@ -134,6 +134,7 @@ BOOL CtabulateDlg::OnInitDialog()
 	
 	labelDataDir.SetWindowTextW(default_genie_data_directory);
 	ListDirectory(&DataFileListing, default_genie_data_directory, default_data_extension);
+	
 
 	ListDirectory(&AnalysisFileListing, default_genie_control_directory, default_analysis_extension);
 
@@ -269,7 +270,7 @@ void CtabulateDlg::SetEnergyTolerance(const double f)
 void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory, 
 	const LPCTSTR filter)
 // Populate a listbox with the contents of a directory; the results are to be
-// filtered based on the file extension.
+// filtered based on the file extension. Auto-resize listbox
 {
 	const TCHAR* localdir = directory;
 	const TCHAR* localfilt = filter;
@@ -277,6 +278,8 @@ void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory,
 	::SetCurrentDirectory(localdir);
 	listbox->ResetContent();
 	listbox->Dir(0, localfilt);
+
+	SetListboxColumnWidth(listbox);
 }
 
 
@@ -677,3 +680,26 @@ std::string CtabulateDlg::ReturnHeaderData(const CString start_file, const CStri
 	return return_string;
 }
 
+
+
+void CtabulateDlg::SetListboxColumnWidth(CListBox * listbox)
+// Update dynamic column width based on pixel width of widest string
+{
+	CString str;
+	CSize sz;
+	int dx{ 0 };
+	CDC* pDC = listbox->GetDC();
+
+	// determine pixel width of largest string
+	for (int i{ 0 }; i < listbox->GetCount(); i++)
+	{
+		listbox->GetText(i, str);
+		sz = pDC->GetTextExtent(str);
+		if (sz.cx > dx)
+			dx = sz.cx;
+	}
+	listbox->ReleaseDC(pDC);
+
+	// set column width to be 30% larger than longest string
+	listbox->SetColumnWidth(dx * LISTBOX_WIDTH_FACTOR);
+}
