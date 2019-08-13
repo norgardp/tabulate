@@ -42,6 +42,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CButton SelectDataDir;
+	CButton UseDataDirectory;
 	CEdit PSEnergyTolerance;
 	CStatic OutputDescription;
 	CListBox DataFileListing;
@@ -104,4 +105,6 @@ public:
 	CButton AnalyzeButton;
 private:
 	void SetListboxColumnWidth(CListBox* listbox);
+	
+	bool ReturnDataDirectoryState();
 };

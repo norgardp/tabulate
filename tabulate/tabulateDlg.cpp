@@ -73,6 +73,7 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RADIO_OPTA, (int&)OutputOptionRB);
 	DDX_Control(pDX, IDC_EDT_FILENAME, OutputFilename);
 	DDX_Control(pDX, IDOK, AnalyzeButton);
+	DDX_Control(pDX, IDC_USE_DATA_IN_DIRECTORY, UseDataDirectory);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -135,17 +136,13 @@ BOOL CtabulateDlg::OnInitDialog()
 	labelDataDir.SetWindowTextW(default_genie_data_directory);
 	ListDirectory(&DataFileListing, default_genie_data_directory, default_data_extension);
 	
-
 	ListDirectory(&AnalysisFileListing, default_genie_control_directory, default_analysis_extension);
-
 	VectorizeDirectoryListing(&DatFiles, &DataFileListing);
-
 	SetEnergyTolerance(default_energy_tolerance);
-	
 	OutputFilename.SetCueBanner(_T("no default"));
 
 	OnBnClickedRadioOpta();
-
+	
 	// ===================== LOCAL INITIALIZATION =====================
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -412,6 +409,9 @@ void CtabulateDlg::PopulateListBoxItems(CListBox* listbox,
 	listbox->ResetContent();
 	for (size_t i{ 0 }; i < data->size(); i++)
 		listbox->AddString(data->at(i));
+
+	// Dynamically resize listbox column width
+	SetListboxColumnWidth(listbox);
 }
 
 
@@ -493,6 +493,7 @@ void CtabulateDlg::SetListboxScrollbar(CListBox& listbox)
 
 	listbox.SetHorizontalExtent(dx);
 }
+
 
 void CtabulateDlg::OnBnClickedOk()
 {
@@ -576,6 +577,13 @@ bool CtabulateDlg::ReturnOverwriteState()
 {
 	UINT overwrite{ OverwriteMode.GetState() };
 	return (overwrite == BST_CHECKED) ? true : false;
+}
+
+
+bool CtabulateDlg::ReturnDataDirectoryState()
+{
+	UINT mode{ UseDataDirectory.GetState() };
+	return (mode == BST_CHECKED) ? true : false;
 }
 
 
@@ -703,3 +711,4 @@ void CtabulateDlg::SetListboxColumnWidth(CListBox * listbox)
 	// set column width to be 30% larger than longest string
 	listbox->SetColumnWidth(dx * LISTBOX_WIDTH_FACTOR);
 }
+
