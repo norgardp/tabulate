@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_OPTC, &CtabulateDlg::OnBnClickedRadioOptc)
 	ON_BN_CLICKED(IDC_RADIO_OPTD, &CtabulateDlg::OnBnClickedRadioOptd)
 	ON_EN_KILLFOCUS(IDC_EDT_FILENAME, &CtabulateDlg::OnEnKillfocusEdtFilename)
+	ON_LBN_DBLCLK(IDC_LIST_LIBFILESINDIR, &CtabulateDlg::OnLbnDblclkListLibfilesindir)
 END_MESSAGE_MAP()
 
 
@@ -664,4 +665,9 @@ void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory,
 	listbox->Dir(0, localfilt);
 
 	SetListboxColumnWidth(listbox);
+}
+
+void CtabulateDlg::OnLbnDblclkListLibfilesindir()
+{
+	OnBnClickedLibrarySelect();
 }

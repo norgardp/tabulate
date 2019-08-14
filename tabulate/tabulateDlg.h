@@ -100,4 +100,6 @@ private:
 	std::string ReturnHeaderData(const CString start_file, const CString end_file);
 	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
 
+public:
+	afx_msg void OnLbnDblclkListLibfilesindir();
 };
