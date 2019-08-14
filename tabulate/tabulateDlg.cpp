@@ -60,7 +60,6 @@ CtabulateDlg::CtabulateDlg(CWnd* pParent /*=NULL*/)
 void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_BTN_SELECTDIR, SelectDataDir);
 	DDX_Control(pDX, IDC_EDIT_ENERGYTOL, PSEnergyTolerance);
 	DDX_Control(pDX, IDC_OUTPUTDESC, OutputDescription);
 	DDX_Control(pDX, IDC_LIST_CNFFILESFORANALYSIS, DataFileListing);
@@ -73,7 +72,6 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RADIO_OPTA, (int&)OutputOptionRB);
 	DDX_Control(pDX, IDC_EDT_FILENAME, OutputFilename);
 	DDX_Control(pDX, IDOK, AnalyzeButton);
-	DDX_Control(pDX, IDC_USE_DATA_IN_DIRECTORY, UseDataDirectory);
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -81,7 +79,6 @@ BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &CtabulateDlg::OnBnClickedOk)
-	ON_BN_CLICKED(IDC_BTN_SELECTDIR, &CtabulateDlg::OnBnClickedBtnSelectDir)
 	ON_BN_CLICKED(IDC_BTN_FILEINSERT, &CtabulateDlg::OnBnClickedBtnFileinsert)
 	ON_BN_CLICKED(IDC_BTN_FILEREMOVE, &CtabulateDlg::OnBnClickedBtnFileremove)
 	ON_BN_CLICKED(IDC_BTN_LIBRARYSELECT, &CtabulateDlg::OnBnClickedLibrarySelect)
@@ -130,23 +127,20 @@ BOOL CtabulateDlg::OnInitDialog()
 	// Set default directories, populate listboxes and std::vectors of CStrings
 	// containing valid filenames (library and data files); set default energy
 	// search tolerance
-	labelLibDir.SetWindowTextW(default_genie_library_directory);
+	::SetCurrentDirectory(default_genie_data_directory);
 	ListDirectory(&LibraryFileListing, default_genie_library_directory, default_library_extension);
-	
-	labelDataDir.SetWindowTextW(default_genie_data_directory);
-	ListDirectory(&DataFileListing, default_genie_data_directory, default_data_extension);
-	
 	ListDirectory(&AnalysisFileListing, default_genie_control_directory, default_analysis_extension);
-	VectorizeDirectoryListing(&DatFiles, &DataFileListing);
+	labelLibDir.SetWindowTextW(default_genie_library_directory);
+	labelDataDir.SetWindowTextW(default_genie_data_directory);
 	SetEnergyTolerance(default_energy_tolerance);
 	OutputFilename.SetCueBanner(_T("no default"));
-
 	OnBnClickedRadioOpta();
-	
+
 	// ===================== LOCAL INITIALIZATION =====================
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
+
 
 void CtabulateDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -264,47 +258,6 @@ void CtabulateDlg::SetEnergyTolerance(const double f)
 }
 
 
-void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory, 
-	const LPCTSTR filter)
-// Populate a listbox with the contents of a directory; the results are to be
-// filtered based on the file extension. Auto-resize listbox
-{
-	const TCHAR* localdir = directory;
-	const TCHAR* localfilt = filter;
-	
-	::SetCurrentDirectory(localdir);
-	listbox->ResetContent();
-	listbox->Dir(0, localfilt);
-
-	SetListboxColumnWidth(listbox);
-}
-
-
-void CtabulateDlg::OnBnClickedBtnSelectDir()
-// Select a non-default DataDirectory. If the new selection is canceled make the
-// previous directory the default.
-{
-	TCHAR previousDirectory[GENIE_MAX_PATH];
-	::GetCurrentDirectory(GENIE_MAX_PATH, previousDirectory);
-
-	::CFolderPickerDialog dlg(previousDirectory, 0, NULL, 0);
-	if (dlg.DoModal() == IDOK)
-	{
-		DataDirectory = dlg.GetPathName();
-		DataDirectory += _T("\\");
-		ListDirectory(&DataFileListing, DataDirectory, default_data_extension);
-		labelDataDir.SetWindowTextW(DataDirectory.MakeLower());
-	}
-	else
-	{
-		DataDirectory = previousDirectory;
-	}
-
-	VectorizeDirectoryListing(&DatFiles, &DataFileListing);
-	OnEnKillfocusEdtFilename();
-}
-
-
 void CtabulateDlg::VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, 
 	const CListBox* ptrListBox)
 // Read contents of a listbox object into a std::vector object. 
@@ -341,21 +294,17 @@ void CtabulateDlg::OnBnClickedBtnFileinsert()
 // and multiple selections are permitted during any individual attempt.
 {
 	CString path;
-	
 	CString filename;
 	wchar_t* p = filename.GetBuffer(FILE_LIST_BUFFER_SIZE);
 	CFileDialog dlg(TRUE);
 	OPENFILENAME& ofn = dlg.GetOFN();
+
 	ofn.Flags |= OFN_HIDEREADONLY;
 	ofn.Flags |= OFN_OVERWRITEPROMPT;
 	ofn.Flags |= OFN_ALLOWMULTISELECT;
 	ofn.lpstrFile = p;
 	ofn.nMaxFile = FILE_LIST_BUFFER_SIZE;
 	ofn.lpstrFilter = default_configuration_filter;
-
-	//CFileDialog dlg(TRUE, default_data_extension, NULL, 
-	//	OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_ALLOWMULTISELECT, 
-	//	default_configuration_filter, NULL, 0, TRUE);
 
 	if(dlg.DoModal() == IDOK)
 	{
@@ -410,7 +359,6 @@ void CtabulateDlg::PopulateListBoxItems(CListBox* listbox,
 	for (size_t i{ 0 }; i < data->size(); i++)
 		listbox->AddString(data->at(i));
 
-	// Dynamically resize listbox column width
 	SetListboxColumnWidth(listbox);
 }
 
@@ -490,7 +438,6 @@ void CtabulateDlg::SetListboxScrollbar(CListBox& listbox)
 
 	pDC->SelectObject(pOldFont);
 	listbox.ReleaseDC(pDC);
-
 	listbox.SetHorizontalExtent(dx);
 }
 
@@ -577,13 +524,6 @@ bool CtabulateDlg::ReturnOverwriteState()
 {
 	UINT overwrite{ OverwriteMode.GetState() };
 	return (overwrite == BST_CHECKED) ? true : false;
-}
-
-
-bool CtabulateDlg::ReturnDataDirectoryState()
-{
-	UINT mode{ UseDataDirectory.GetState() };
-	return (mode == BST_CHECKED) ? true : false;
 }
 
 
@@ -707,8 +647,21 @@ void CtabulateDlg::SetListboxColumnWidth(CListBox * listbox)
 			dx = sz.cx;
 	}
 	listbox->ReleaseDC(pDC);
-
-	// set column width to be 30% larger than longest string
 	listbox->SetColumnWidth(dx * LISTBOX_WIDTH_FACTOR);
 }
 
+
+void CtabulateDlg::ListDirectory(CListBox* listbox, const LPCTSTR directory,
+	const LPCTSTR filter)
+// Initialization function to populate listboxes for the library and asf file
+// initial directories.
+{
+	const TCHAR* localdir = directory;
+	const TCHAR* localfilt = filter;
+
+	::SetCurrentDirectory(localdir);
+	listbox->ResetContent();
+	listbox->Dir(0, localfilt);
+
+	SetListboxColumnWidth(listbox);
+}

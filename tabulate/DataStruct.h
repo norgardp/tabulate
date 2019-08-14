@@ -23,7 +23,7 @@ namespace DataStructure
 			FLOAT Rate;			// CAM_F_PSCTSS
 			FLOAT Error;		// CAM_F_PSCERR
 			std::string NucName;// from LibraryStruct
-			FLOAT IdealEnergy;	// frmo LibratyStruct
+			FLOAT IdealEnergy;	// from LibratyStruct
 		};
 	}
 

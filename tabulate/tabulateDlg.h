@@ -40,9 +40,9 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
 public:
-	CButton SelectDataDir;
-	CButton UseDataDirectory;
+	CEdit OutputFilename; 
 	CEdit PSEnergyTolerance;
 	CStatic OutputDescription;
 	CListBox DataFileListing;
@@ -51,9 +51,10 @@ public:
 	CStatic labelDataDir;
 	CStatic labelLibDir;
 	CButton OverwriteMode;
+	CButton AnalyzeButton;
 	CListBox AnalysisFileListing;
-	int OutputOptionRB{ 0 };
-
+	
+public:
 	afx_msg void OnBnClickedRadioOpta();
 	afx_msg void OnBnClickedRadioOptb();
 	afx_msg void OnBnClickedRadioOptc();
@@ -61,10 +62,10 @@ public:
 	afx_msg void OnBnClickedBtnFileinsert();
 	afx_msg void OnBnClickedBtnFileremove();
 	afx_msg void OnEnKillfocusEditEnergytol();
-	afx_msg void OnBnClickedBtnSelectDir();
 	afx_msg void OnBnClickedLibrarySelect();
 	afx_msg void OnBnClickedBtnFileremoveall();
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnEnKillfocusEdtFilename();
 
 private:
 	CString DataDirectory;
@@ -75,10 +76,10 @@ private:
 	int DatFileCount;
 	double EnergyTolerance;
 	bool output_file_status{ false };
+	int OutputOptionRB{ 0 };
 
 private:
 	void SetEnergyTolerance(const double f);
-	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
 	bool ReturnOverwriteState();
 	void VectorizeDirectoryListing(std::vector<CString>* ptrDirectoryListing, const CListBox* ptrListBox);
 	int GetListBoxCount(CListBox* listbox);
@@ -86,6 +87,7 @@ private:
 	void PopulateListBoxItems(CListBox* listbox, std::vector<CString>* data);
 	bool LocateVectorDuplicateEntry(const std::vector<CString>* localvector, const CString testvalue);
 	CString GetListBoxSelection(const CListBox& listbox, const int i);
+	void SetListboxColumnWidth(CListBox* listbox); 
 	void SetListboxScrollbar(CListBox& theListbox);
 	OutputOption ReturnOutputOption();
 	std::string ReturnLibraryFilename();
@@ -94,17 +96,8 @@ private:
 	DataStructure::InitializationOptions ObtainInitializationOptions();
 	void ButtonHandler();
 	CString CreateFilename(const CStatic& directory, const CEdit& filename);
-	
 	std::ofstream OpenFileForOutput();
-
 	std::string ReturnHeaderData(const CString start_file, const CString end_file);
+	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
 
-public:
-	CEdit OutputFilename;
-	afx_msg void OnEnKillfocusEdtFilename();
-	CButton AnalyzeButton;
-private:
-	void SetListboxColumnWidth(CListBox* listbox);
-	
-	bool ReturnDataDirectoryState();
 };
