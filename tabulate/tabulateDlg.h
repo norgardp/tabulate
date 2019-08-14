@@ -45,6 +45,7 @@ public:
 	CEdit OutputFilename; 
 	CEdit PSEnergyTolerance;
 	CStatic OutputDescription;
+	CStatic FileUnderConsideration;
 	CListBox DataFileListing;
 	CListBox LibraryFileListing;
 	CListBox LibraryContentListing;
@@ -66,6 +67,7 @@ public:
 	afx_msg void OnBnClickedBtnFileremoveall();
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnEnKillfocusEdtFilename();
+	afx_msg void OnLbnDblclkListLibfilesindir();
 
 private:
 	CString DataDirectory;
@@ -100,6 +102,4 @@ private:
 	std::string ReturnHeaderData(const CString start_file, const CString end_file);
 	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
 
-public:
-	afx_msg void OnLbnDblclkListLibfilesindir();
 };

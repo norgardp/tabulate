@@ -72,6 +72,8 @@ void CtabulateDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RADIO_OPTA, (int&)OutputOptionRB);
 	DDX_Control(pDX, IDC_EDT_FILENAME, OutputFilename);
 	DDX_Control(pDX, IDOK, AnalyzeButton);
+	DDX_Control(pDX, IDC_FILEBEINGPROCESSED, FileUnderConsideration);
+
 }
 
 BEGIN_MESSAGE_MAP(CtabulateDlg, CDialogEx)
@@ -136,6 +138,7 @@ BOOL CtabulateDlg::OnInitDialog()
 	SetEnergyTolerance(default_energy_tolerance);
 	OutputFilename.SetCueBanner(_T("no default"));
 	OnBnClickedRadioOpta();
+	FileUnderConsideration.SetWindowTextW(_T("Not Analyzing"));
 
 	// ===================== LOCAL INITIALIZATION =====================
 
@@ -447,7 +450,8 @@ void CtabulateDlg::OnBnClickedOk()
 {
 	DataStructure::InitializationOptions options;
 	options = ObtainInitializationOptions();
-	
+	std::string localFilename;
+
 	AnalyzeButton.EnableWindow(FALSE);
 	AnalyzeButton.SetWindowTextW(_T("Running"));
 	if (output_file_status)
@@ -458,6 +462,9 @@ void CtabulateDlg::OnBnClickedOk()
 		int sizeola(DatFiles.size());
 		for (auto i{ 0 }; i < sizeola; i++)
 		{
+			localFilename = ReturnDataFilename(i);
+			std::wstring wfile(localFilename.begin(), localFilename.end());
+			FileUnderConsideration.SetWindowTextW(wfile.c_str());
 			CNFobject data(options);
 			data.CreateInstance(ReturnDataFilename(i));
 			if (i == 0)
@@ -466,9 +473,13 @@ void CtabulateDlg::OnBnClickedOk()
 		}
 
 		myFile.close();
-		AnalyzeButton.SetWindowTextW(_T("Analyze"));
-		AnalyzeButton.EnableWindow(TRUE);
 	}
+	else
+	{
+		FileUnderConsideration.SetWindowTextW(_T("No base filename suggested"));
+	}
+	AnalyzeButton.SetWindowTextW(_T("Analyze"));
+	AnalyzeButton.EnableWindow(TRUE);
 }
 
 
