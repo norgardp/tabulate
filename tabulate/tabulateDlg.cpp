@@ -659,7 +659,8 @@ void CtabulateDlg::SetListboxColumnWidth(CListBox * listbox)
 			dx = sz.cx;
 	}
 	listbox->ReleaseDC(pDC);
-	listbox->SetColumnWidth(dx * LISTBOX_WIDTH_FACTOR);
+	double d{ dx * LISTBOX_WIDTH_FACTOR };
+	listbox->SetColumnWidth((int)d);
 }
 
 
