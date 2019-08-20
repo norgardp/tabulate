@@ -321,6 +321,8 @@ void CtabulateDlg::OnBnClickedBtnFileinsert()
 				DatFiles.push_back(::PathFindFileNameW(path));
 		}
 		PopulateListBoxItems(&DataFileListing, &DatFiles);
+		DataDirectory = dlg.GetFolderPath();
+		labelDataDir.SetWindowTextW(DataDirectory);
 	}
 	filename.ReleaseBuffer();
 	path.ReleaseBuffer();
@@ -513,6 +515,7 @@ std::string CtabulateDlg::ReturnLibraryFilename()
 std::string CtabulateDlg::ReturnDataFilename(const int i)
 {
 	CString data_file(DataDirectory);
+	data_file.Append(_T("\\"));
 	data_file.Append(DatFiles.at(i));
 	return std::string(CW2A(data_file));
 }
