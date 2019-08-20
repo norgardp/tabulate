@@ -587,11 +587,14 @@ void CtabulateDlg::OnEnKillfocusEditEnergytol()
 
 void CtabulateDlg::OnEnKillfocusEdtFilename()
 {
-	CString full_path(CreateFilename(labelDataDir, OutputFilename));
-	CString base_filename;
 
-	OutputFilename.GetWindowTextW(base_filename);
-	if (!(base_filename.IsEmpty()))
+	CString relative_file; 
+	OutputFilename.GetWindowTextW(relative_file);
+	CString full_path(DataDirectory);
+	full_path.Append(_T("\\"));
+	full_path.Append(relative_file);
+
+	if (!(relative_file.IsEmpty()))
 	{
 		CFile myfile;
 		CFileStatus file_status;
@@ -618,8 +621,13 @@ CString CtabulateDlg::CreateFilename(const CStatic& directory, const CEdit& file
 
 std::ofstream CtabulateDlg::OpenFileForOutput()
 {
-	CString fullpath(CreateFilename(labelDataDir, OutputFilename));
-	std::string stdstr_path = CW2A(fullpath);
+	CString relative_file;
+	OutputFilename.GetWindowTextW(relative_file);
+	CString full_path(DataDirectory);
+	full_path.Append(_T("\\"));
+	full_path.Append(relative_file);
+
+	std::string stdstr_path = CW2A(full_path);
 	std::ofstream FP;
 	FP.open(stdstr_path, std::ios::out | std::ios::trunc);
 	return FP;
