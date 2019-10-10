@@ -5,6 +5,7 @@
 #pragma once
 #include "afxwin.h"
 #include "afxcmn.h"
+#include <ShObjIdl.h>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -102,4 +103,6 @@ private:
 	std::string ReturnHeaderData(const CString start_file, const CString end_file);
 	void ListDirectory(CListBox* listbox, const LPCTSTR directory, const LPCTSTR filter);
 
+protected:
+	HRESULT BasicFileOpen();
 };

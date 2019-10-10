@@ -694,3 +694,16 @@ void CtabulateDlg::OnLbnDblclkListLibfilesindir()
 {
 	OnBnClickedLibrarySelect();
 }
+
+
+HRESULT CtabulateDlg::BasicFileOpen()
+{
+	IFileDialog *pfd = NULL;
+	HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+	if (SUCCEEDED(hr))
+	{
+			
+	}
+
+	return E_NOTIMPL;
+}

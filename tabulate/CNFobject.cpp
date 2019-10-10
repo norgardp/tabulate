@@ -321,16 +321,16 @@ void CNFobject::WriteHeaderModeData(std::stringstream& ss, const bool use_descri
 
 	switch (output_option)
 	{
-	case OutputOption::a:
-	case OutputOption::c:
+	case OutputOption::b:
+	case OutputOption::d:
 		param1_to_pass = (use_descriptors) ? std::string("EReal") : std::string(fwf_realtime, ' ');
 		param2_to_pass = (use_descriptors) ? std::string("ELive") : std::string(fwf_livetime, ' ');
 		WriteCAMRealTime(ss, param1_to_pass);
 		WriteCAMLiveTime(ss, param2_to_pass);
 		break;
 
-	case OutputOption::b:
-	case OutputOption::d:
+	case OutputOption::a:
+	case OutputOption::c:
 		param1_to_pass = (use_descriptors) ? std::string("Sample ID") : std::string(fwf_sample_id, ' ');
 		param2_to_pass = (use_descriptors) ? std::string("% Dead") : std::string(fwf_deadtime_pct, ' ');
 		WriteCAMSampleID(ss, param1_to_pass);
