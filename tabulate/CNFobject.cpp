@@ -417,14 +417,14 @@ void CNFobject::WriteDataModeData(std::stringstream& ss)
 {
 	switch (output_option)
 	{
-	case OutputOption::a:
-	case OutputOption::c:
+	case OutputOption::b:
+	case OutputOption::d:
 		WriteCAMRealTime(ss);
 		WriteCAMLiveTime(ss);
 		break;
 
-	case OutputOption::b:
-	case OutputOption::d:
+	case OutputOption::a:
+	case OutputOption::c:
 		WriteCAMSampleID(ss);
 		WriteCAMDeadTime(ss);
 		break;
