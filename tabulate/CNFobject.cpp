@@ -174,7 +174,7 @@ void CNFobject::PopulateNuclideData()
 {
 	USHORT record;
 	LONG line_count = ReturnRecordCount(CAM_CLS_PEAK);
-	for (LONG i{ 1 }; i < line_count; i++)
+	for (LONG i{ 0 }; i < line_count; i++)
 	{
 		record = static_cast<USHORT>(i) + 1;
 		psData.Nuclides.push_back(ReturnNuclideInformation(record));
@@ -194,7 +194,12 @@ DataStructure::NuclideStructure::NuclideStruct CNFobject::ReturnNuclideInformati
 	data.FWHM = ReturnNumericParam(CAM_F_PSFWHM, i, Fdummy);
 	data.Rate = ReturnNumericParam(CAM_F_PSCTSS, i, Fdummy);
 	data.Error = ReturnNumericParam(CAM_F_PSCERR, i, Fdummy);
-	
+
+	// PAN 2020-Jan-06; test for multiplet in peak-search algorithm output
+	// Trying to figure out why data is missing from Ruth-Ann's data when
+	// TABULATE works on it.
+	long psmult = ReturnNumericParam(CAM_L_PSPMULT, i, Ldummy);
+
 	return data;
 }
 
