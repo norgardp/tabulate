@@ -198,7 +198,7 @@ DataStructure::NuclideStructure::NuclideStruct CNFobject::ReturnNuclideInformati
 	// PAN 2020-Jan-06; test for multiplet in peak-search algorithm output
 	// Trying to figure out why data is missing from Ruth-Ann's data when
 	// TABULATE works on it.
-	long psmult = ReturnNumericParam(CAM_L_PSPMULT, i, Ldummy);
+	//long psmult = ReturnNumericParam(CAM_L_PSPMULT, i, Ldummy);
 
 	return data;
 }
