@@ -35,7 +35,7 @@ static constexpr TCHAR* default_analysis_filter = _T("Analysis Sequence Files (*
 static constexpr TCHAR* output_option_a = _T("Sample ID and Percent Dead Time; for each energy line\n - Peak Area\n - Iterations\n - Peak FWHM (keV)\n - Peak Energy (keV)");
 static constexpr TCHAR* output_option_b = _T("Real Time and Corrected Live Time; for each energy line\n - Peak Area\n - Peak FWHM (keV)");
 static constexpr TCHAR* output_option_c = _T("Sample ID and Percent Dead Time; for each energy line\n - Peak Area\n - Error (%)\n - Peak FWHM (keV)\n - Peak Energy (keV)");
-static constexpr TCHAR* output_option_d = _T("Real Time and Corrected Live Time; for each energy line\n - Peak Area\n - Peak FWHM (keV)\n - Error (%)");
+static constexpr TCHAR* output_option_d = _T("Real Time, Corrected Live Time, and Percent Dead time;\n for each energy line\n - Peak Area\n - Peak FWHM (keV)\n - Error (%)");
 
 // Energy tolerance used for library directed peak search
 static constexpr double default_energy_tolerance = 2.50;
