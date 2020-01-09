@@ -327,16 +327,24 @@ void CNFobject::WriteHeaderCommonData(std::stringstream& ss, const bool use_desc
 void CNFobject::WriteHeaderModeData(std::stringstream& ss, const bool use_descriptors)
 {
 	
-	std::string param1_to_pass, param2_to_pass;
+	std::string param1_to_pass, param2_to_pass, param3_to_pass;
 
 	switch (output_option)
 	{
 	case OutputOption::b:
-	case OutputOption::d:
 		param1_to_pass = (use_descriptors) ? std::string("EReal") : std::string(fwf_realtime, ' ');
 		param2_to_pass = (use_descriptors) ? std::string("ELive") : std::string(fwf_livetime, ' ');
 		WriteCAMRealTime(ss, param1_to_pass);
 		WriteCAMLiveTime(ss, param2_to_pass);
+		break;
+	
+	case OutputOption::d:
+		param1_to_pass = (use_descriptors) ? std::string("EReal") : std::string(fwf_realtime, ' ');
+		param2_to_pass = (use_descriptors) ? std::string("ELive") : std::string(fwf_livetime, ' ');
+		param3_to_pass = (use_descriptors) ? std::string("% Dead") : std::string(fwf_deadtime_pct, ' ');
+		WriteCAMRealTime(ss, param1_to_pass);
+		WriteCAMLiveTime(ss, param2_to_pass);
+		WriteCAMDeadTime(ss, param3_to_pass);
 		break;
 
 	case OutputOption::a:
@@ -346,12 +354,6 @@ void CNFobject::WriteHeaderModeData(std::stringstream& ss, const bool use_descri
 		WriteCAMSampleID(ss, param1_to_pass);
 		WriteCAMDeadTime(ss, param2_to_pass);
 		break;
-	}
-
-	if (output_option == OutputOption::d)
-	{
-		param1_to_pass = (use_descriptors) ? std::string("% Dead") : std::string(fwf_deadtime_pct, ' ');
-		WriteCAMDeadTime(ss, param1_to_pass);
 	}
 }
 
@@ -434,9 +436,14 @@ void CNFobject::WriteDataModeData(std::stringstream& ss)
 	switch (output_option)
 	{
 	case OutputOption::b:
+		WriteCAMRealTime(ss);
+		WriteCAMLiveTime(ss);
+		break;
+
 	case OutputOption::d:
 		WriteCAMRealTime(ss);
 		WriteCAMLiveTime(ss);
+		WriteCAMDeadTime(ss);
 		break;
 
 	case OutputOption::a:
