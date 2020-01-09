@@ -174,9 +174,14 @@ void CNFobject::PopulateNuclideData()
 {
 	USHORT record;
 	LONG line_count = ReturnRecordCount(CAM_CLS_PEAK);
+	LONG Ldummy;
+	DOUBLE Ddummy;
+	double PPCTIME{ 0 };
+
 	for (LONG i{ 0 }; i < line_count; i++)
 	{
 		record = static_cast<USHORT>(i) + 1;
+		PPCTIME = ReturnTimeNParam(CAM_X_PPELIVE, record);
 		psData.Nuclides.push_back(ReturnNuclideInformation(record));
 	}
 }
