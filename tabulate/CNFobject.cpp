@@ -347,6 +347,12 @@ void CNFobject::WriteHeaderModeData(std::stringstream& ss, const bool use_descri
 		WriteCAMDeadTime(ss, param2_to_pass);
 		break;
 	}
+
+	if (output_option == OutputOption::d)
+	{
+		param1_to_pass = (use_descriptors) ? std::string("% Dead") : std::string(fwf_deadtime_pct, ' ');
+		WriteCAMDeadTime(ss, param1_to_pass);
+	}
 }
 
 
